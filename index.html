@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>最強ツール</title>
+
+<style>
+body{
+    font-family:sans-serif;
+    max-width:500px;
+    margin:auto;
+    padding:20px;
+}
+
+h2{
+    text-align:center;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-bottom:10px;
+    box-sizing:border-box;
+    font-size:16px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+#output{
+    margin-top:20px;
+    white-space:pre-line;
+    font-size:18px;
+    border:1px solid #ccc;
+    padding:15px;
+    border-radius:8px;
+}
+
+#copyStatus{
+    margin-top:10px;
+    text-align:center;
+    font-weight:bold;
+}
+
+.hidden{
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ログイン画面 -->
+
+<div id="loginArea">
+
+    <h2>最強ツール</h2>
+
+    <input
+        id="password"
+        type="password"
+        placeholder="暗証番号を入力">
+
+    <button onclick="login()">
+        ログイン
+    </button>
+
+</div>
+
+<!-- ツール本体 -->
+
+<div id="appArea" class="hidden">
+
+    <h2>最強ツール</h2>
+
+    <input
+        id="seed"
+        type="number"
+        placeholder="種銭">
+
+    <input
+        id="salary"
+        type="number"
+        placeholder="日当">
+
+    <input
+        id="investment"
+        type="number"
+        placeholder="投資">
+
+    <input
+        id="cash"
+        type="number"
+        placeholder="換金">
+
+    <button onclick="calculate()">
+        計算
+    </button>
+
+    <button onclick="copyText()">
+        コピー
+    </button>
+
+    <div id="output"></div>
+
+    <div id="copyStatus"></div>
+
+</div>
+
+<script>
+
+const PASSWORD = "120708";
+
+let resultText = "";
+
+window.onload = function(){
+
+    if(localStorage.getItem("loggedIn") === "true"){
+
+        showApp();
+
+    }
+
+};
+
+function login(){
+
+    const input =
+        document.getElementById("password").value;
+
+    if(input === PASSWORD){
+
+        localStorage.setItem("loggedIn","true");
+
+        showApp();
+
+    }else{
+
+        alert("暗証番号が違います");
+
+    }
+}
+
+function showApp(){
+
+    document
+        .getElementById("loginArea")
+        .classList.add("hidden");
+
+    document
+        .getElementById("appArea")
+        .classList.remove("hidden");
+}
+
+function formatNumber(num){
+
+    return Number(num)
+        .toLocaleString("ja-JP");
+
+}
+
+function calculate(){
+
+    const seed =
+        Number(
+            document
+            .getElementById("seed")
+            .value || 0
+        );
+
+    const salary =
+        Number(
+            document
+            .getElementById("salary")
+            .value || 0
+        );
+
+    const investment =
+        Number(
+            document
+            .getElementById("investment")
+            .value || 0
+        );
+
+    const cash =
+        Number(
+            document
+            .getElementById("cash")
+            .value || 0
+        );
+
+    const next =
+        seed + cash - salary - investment;
+
+    const now = new Date();
+
+    const week =
+        ["日","月","火","水","木","金","土"];
+
+    resultText =
+`${now.getMonth()+1}/${now.getDate()}(${week[now.getDay()]})加藤
+種銭${formatNumber(seed)}
+日当${formatNumber(salary)}
+投資${formatNumber(investment)}
+換金${formatNumber(cash)}
+次回${formatNumber(next)}`;
+
+    document
+        .getElementById("output")
+        .innerText = resultText;
+}
+
+async function copyText(){
+
+    if(resultText === ""){
+
+        alert("先に計算してください");
+
+        return;
+    }
+
+    try{
+
+        await navigator.clipboard
+            .writeText(resultText);
+
+        document
+            .getElementById("copyStatus")
+            .innerText =
+            "✓ コピーしました";
+
+    }catch{
+
+        alert("コピーに失敗しました");
+
+    }
+}
+
+</script>
+
+</body>
+</html>

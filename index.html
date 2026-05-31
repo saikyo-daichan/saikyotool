@@ -26,13 +26,19 @@ pre{white-space:pre-wrap}
 
 <div id="menuArea" class="hidden">
 <h2 class="appTitle"></h2>
-<button onclick="showTensei()">転生データ</button>
-<button onclick="showTekken()">鉄拳データ</button>
-<button onclick="showSeisan()">清算</button>
+<button onclick="showTensei()">台データ作成</button>
+<button onclick="showSeisan()">精算</button>
 </div>
 
 <div id="tenseiArea" class="hidden">
-<h2>転生データ</h2>
+<h2>データ作成</h2>
+
+<select id="machine" onchange="updateAnimalOptions();updateTenseiPreview()">
+<option value="北斗転生" selected>北斗転生</option>
+<option value="鉄拳">鉄拳</option>
+<option value="北斗">北斗</option>
+<option value="ミリオンゴッド">ミリオンゴッド</option>
+</select>
 
 <select id="store" onchange="updateTenseiPreview()">
 <option>メガサイバー新鎌ヶ谷</option>
@@ -43,10 +49,7 @@ pre{white-space:pre-wrap}
 <input id="machineNo" type="number" placeholder="何台目か" oninput="updateTenseiPreview()">
 <input id="daiBan" type="number" placeholder="台番" oninput="updateTenseiPreview()">
 
-<select id="animal" onchange="updateTenseiPreview()">
-<option>イノシシ</option>
-<option>ウリ坊</option>
-</select>
+<select id="animal" onchange="updateTenseiPreview()"></select>
 
 <input id="startSpin" type="number" placeholder="回転数" oninput="updateTenseiPreview()">
 <input id="totalSpin" type="number" placeholder="総回転数" oninput="updateTenseiPreview()">
@@ -71,28 +74,20 @@ pre{white-space:pre-wrap}
 
 <div id="historyList" class="box"></div>
 
-<button onclick="copyTensei()">コピー</button>
-<div id="copyStatusTensei"></div>
-
+<button onclick="copyTensei(event)">コピー</button>
 <pre id="tenseiOutput" class="box"></pre>
 
 <button onclick="showMenu()">戻る</button>
 </div>
 
-<div id="tekkenArea" class="hidden">
-<h2>鉄拳データ</h2>
-<p>作成中...</p>
-<button onclick="showMenu()">戻る</button>
-</div>
-
 <div id="seisanArea" class="hidden">
-<h2>清算</h2>
+<h2>精算</h2>
 <input id="seed" type="number" placeholder="種銭">
 <input id="salary" type="number" placeholder="日当">
 <input id="investment" type="number" placeholder="投資">
 <input id="cash" type="number" placeholder="換金">
 <button onclick="calculate()">計算</button>
-<button onclick="copyText()">コピー</button>
+<button onclick="copyText(event)">コピー</button>
 <pre id="output"></pre>
 <button onclick="showMenu()">戻る</button>
 </div>
@@ -109,16 +104,16 @@ window.onload=()=>{
  document.title=APP_NAME;
  document.querySelectorAll(".appTitle").forEach(x=>x.innerText=APP_NAME);
  if(localStorage.getItem("loggedIn")==="true") showMenu();
+ updateAnimalOptions();
 };
 
 function hideAll(){
- ["loginArea","menuArea","tenseiArea","tekkenArea","seisanArea"].forEach(id=>{
+ ["loginArea","menuArea","tenseiArea","seisanArea"].forEach(id=>{
  document.getElementById(id).classList.add("hidden");
  });
 }
 function showMenu(){hideAll();menuArea.classList.remove("hidden");}
 function showTensei(){hideAll();tenseiArea.classList.remove("hidden");updateTenseiPreview();}
-function showTekken(){hideAll();tekkenArea.classList.remove("hidden");}
 function showSeisan(){hideAll();seisanArea.classList.remove("hidden");}
 
 function login(){
@@ -128,54 +123,32 @@ function login(){
  }else alert("暗証番号が違います");
 }
 
-function calculate(){
- const seedV=Number(seed.value||0);
- const salaryV=Number(salary.value||0);
- const investV=Number(investment.value||0);
- const cashV=Number(cash.value||0);
- const next=seedV+cashV-salaryV-investV;
- const d=new Date();
- const w=["日","月","火","水","木","金","土"];
- resultText=`${d.getMonth()+1}/${d.getDate()}(${w[d.getDay()]})${USER_NAME}
-種銭${seedV.toLocaleString()}
-日当${salaryV.toLocaleString()}
-投資${investV.toLocaleString()}
-換金${cashV.toLocaleString()}
-次回${next.toLocaleString()}`;
- output.textContent=resultText;
-}
-
-async function copyText(){
-
-    if(!resultText) return;
-
-    const btn = event.target;
-
-    await navigator.clipboard.writeText(
-        resultText
-    );
-
-    btn.innerText = "✓ コピーしました！";
-
-    setTimeout(() => {
-        btn.innerText = "コピー";
-    }, 1000);
-
+function updateAnimalOptions(){
+ const machine=document.getElementById('machine').value;
+ const animal=document.getElementById('animal');
+ let options=[];
+ if(machine==='北斗転生') options=['イノシシ','ウリ坊'];
+ else if(machine==='鉄拳') options=['リセ','AT間天井狙い'];
+ else if(machine==='北斗') options=['リセ','差枚'];
+ else if(machine==='ミリオンゴッド') options=['AT間連荘狙い','前回VVV揃い後','前回Z-ZONE後','前回赤7揃い後','前回天井到達後','前回GOD揃い後'];
+ animal.innerHTML='';
+ options.forEach(o=>{
+  const opt=document.createElement('option');
+  opt.value=o;
+  opt.textContent=o;
+  animal.appendChild(opt);
+ });
 }
 
 function addEntry(){
  const game=Number(hitGame.value);
  const chain=Number(chainCount.value);
  const gain=Number(gainBall.value);
-
  if(!game||!chain)return;
-
  tenseiHistory.unshift({game,chain,gain});
-
  hitGame.value="";
  chainCount.value="";
  gainBall.value="";
-
  updateTenseiPreview();
 }
 
@@ -185,26 +158,59 @@ function deleteEntry(i){
 }
 
 function updateTenseiPreview(){
-
  historyList.innerHTML=tenseiHistory.map((x,i)=>
  `<div>${x.game}G → ${x.chain}連 → ${x.gain}玉 <button class="smallbtn" onclick="deleteEntry(${i})">削除</button></div>`
- ).join("");
+ ).join("\n");
 
- const gainText=tenseiHistory.map(x=>`獲得玉###${x.gain}`).join("\n");
+ const machine=document.getElementById('machine').value;
+ const animal=document.getElementById('animal').value;
+ const machineNoVal=document.getElementById('machineNo').value||"";
+ const machineNoMap={"北斗転生":3818,"鉄拳":3818,"北斗":3840,"ミリオンゴッド":3818};
+ const baseNo=machineNoMap[machine];
 
- const hitText=tenseiHistory.map(x=>{
-   if(x.chain===1){
-      return `${x.game}#1#2`;
-   }
-   return `${x.game}#1#2###${x.chain}`;
+ let machineRate="";
+ let expect="";
+
+ if(machine==='北斗転生'){
+  machineRate = animal==='ウリ坊' ? "機械割#99" : "機械割#106";
+ }
+
+ if(machine==='鉄拳'){
+  if(animal==='リセ') expect="等価期待値1479";
+ }
+
+ if(machine==='北斗'){
+  machineRate="";
+ }
+
+ if(machine==='ミリオンゴッド'){
+  if(animal==='前回VVV揃い後') machineRate="機械割#130";
+  else if(['前回Z-ZONE後','前回赤7揃い後','前回天井到達後'].includes(animal)) machineRate="機械割#102";
+  else if(animal==='前回GOD揃い後') machineRate="機械割#101";
+  else if(animal==='AT間連荘狙い') expect="等価期待値";
+ }
+
+ const gainText = "獲得玉###" + [...tenseiHistory].reverse().map(x=>x.gain).join("#");
+
+ const hitText = tenseiHistory.map(x=>{
+  if(machine==='ミリオンゴッド'){
+    return `${x.game}#${x.chain===1?1: x.chain}`;
+  }
+  if(x.chain===1){
+    return `${x.game}#1`;
+  }
+  return `${x.game}#1#2###${x.chain}`;
  }).join("\n");
 
- tenseiOutput.textContent=`機種番号3818
-計算条件1
-(北斗転生 ${animal.value}${machineNo.value||""})
-(1:RB 2:AT)
+ const headerBBAT = (machine==='鉄拳') ? "(1:BB 2:AT)" : "(1:RB 2:AT)";
 
-機械割#106
+ tenseiOutput.textContent=`機種番号${baseNo}
+計算条件1
+(${machine} ${animal}${machineNoVal})
+${headerBBAT}
+
+${expect}
+${machineRate}
 仕事量同集計
 総回転数${totalSpin.value||0}
 
@@ -228,20 +234,41 @@ ${hitText}
 名前${USER_NAME}`;
 }
 
-async function copyTensei(){
+async function copyTensei(e){
+ const btn=e.target;
+ try{
+  await navigator.clipboard.writeText(tenseiOutput.textContent);
+  const old=btn.innerText;
+  btn.innerText="コピーしました！";
+  setTimeout(()=>btn.innerText=old||"コピー",1000);
+ }catch(err){alert("コピー失敗");}
+}
 
-    const btn = event.target;
+async function copyText(e){
+ const btn=e.target;
+ try{
+  await navigator.clipboard.writeText(resultText);
+  const old=btn.innerText;
+  btn.innerText="コピーしました！";
+  setTimeout(()=>btn.innerText=old||"コピー",1000);
+ }catch(err){alert("コピー失敗");}
+}
 
-    await navigator.clipboard.writeText(
-        tenseiOutput.textContent
-    );
-
-    btn.innerText = "✓ コピーしました！";
-
-    setTimeout(() => {
-        btn.innerText = "コピー";
-    }, 1000);
-
+function calculate(){
+ const seedV=Number(seed.value||0);
+ const salaryV=Number(salary.value||0);
+ const investV=Number(investment.value||0);
+ const cashV=Number(cash.value||0);
+ const next=seedV+cashV-salaryV-investV;
+ const d=new Date();
+ const w=["日","月","火","水","木","金","土"];
+ resultText=`${d.getMonth()+1}/${d.getDate()}(${w[d.getDay()]})${USER_NAME}
+種銭${seedV.toLocaleString()}
+日当${salaryV.toLocaleString()}
+投資${investV.toLocaleString()}
+換金${cashV.toLocaleString()}
+次回${next.toLocaleString()}`;
+ output.textContent=resultText;
 }
 </script>
 </body>

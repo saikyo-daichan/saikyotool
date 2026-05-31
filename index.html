@@ -71,7 +71,8 @@ pre{white-space:pre-wrap}
 
 <div id="historyList" class="box"></div>
 
-<button onclick="copyTensei()">転生データをコピー</button>
+<button onclick="copyTensei()">コピー</button>
+<div id="copyStatusTensei"></div>
 
 <pre id="tenseiOutput" class="box"></pre>
 
@@ -145,7 +146,21 @@ function calculate(){
 }
 
 async function copyText(){
- if(resultText) await navigator.clipboard.writeText(resultText);
+
+    if(!resultText) return;
+
+    const btn = event.target;
+
+    await navigator.clipboard.writeText(
+        resultText
+    );
+
+    btn.innerText = "✓ コピーしました！";
+
+    setTimeout(() => {
+        btn.innerText = "コピー";
+    }, 1000);
+
 }
 
 function addEntry(){
@@ -214,7 +229,19 @@ ${hitText}
 }
 
 async function copyTensei(){
- await navigator.clipboard.writeText(tenseiOutput.textContent);
+
+    const btn = event.target;
+
+    await navigator.clipboard.writeText(
+        tenseiOutput.textContent
+    );
+
+    btn.innerText = "✓ コピーしました！";
+
+    setTimeout(() => {
+        btn.innerText = "コピー";
+    }, 1000);
+
 }
 </script>
 </body>

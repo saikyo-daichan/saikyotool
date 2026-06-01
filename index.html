@@ -28,6 +28,12 @@ pre{white-space:pre-wrap}
 <h2 class="appTitle"></h2>
 <button onclick="showTensei()">台データ作成</button>
 <button onclick="showSeisan()">精算</button>
+<div id="menuArea" class="hidden">
+<h2 class="appTitle"></h2>
+<button onclick="showTensei()">台データ作成</button>
+<button onclick="showSeisan()">精算</button>
+<button onclick="showKouryaku()">攻略</button>
+</div>
 </div>
 
 <div id="tenseiArea" class="hidden">
@@ -89,6 +95,14 @@ pre{white-space:pre-wrap}
 <button onclick="calculate()">計算</button>
 <button onclick="copyText(event)">コピー</button>
 <pre id="output"></pre>
+<button onclick="showMenu()">戻る</button>
+</div>
+
+<div id="kouryakuArea" class="hidden">
+<h2>攻略</h2>
+
+<p>未設定</p>
+
 <button onclick="showMenu()">戻る</button>
 </div>
 

@@ -28,9 +28,21 @@ pre{white-space:pre-wrap}
 /* --- スロット用の拡張スタイル --- */
 .slot-header {
  display: flex;
- justify-content: flex-end;
+ justify-content: space-between;
  align-items: center;
  margin-bottom: 15px;
+}
+.sound-btn {
+ width: auto;
+ margin-bottom: 0;
+ padding: 6px 14px;
+ font-weight: bold;
+ background-color: #3f51b5;
+ color: white;
+ border: none;
+ border-radius: 4px;
+ font-size: 14px;
+ box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 .samai-display {
  font-size: 18px;
@@ -196,6 +208,7 @@ pre{white-space:pre-wrap}
 
 <div id="slotArea" class="hidden">
  <div class="slot-header">
+  <button id="soundToggleBtn" class="sound-btn" onclick="toggleSound()">🔊 サウンド: ON</button>
   <div id="samaiDisplay" class="samai-display">差枚: 0枚</div>
  </div>
 
@@ -279,7 +292,7 @@ pre{white-space:pre-wrap}
 <select id="animal" onchange="updateTenseiPreview()"></select>
 <input id="startSpin" type="number" placeholder="回転数" oninput="updateTenseiPreview()">
 <input id="totalSpin" type="number" placeholder="総回転数" oninput="updateTenseiPreview()">
-<input id="remainBall" type="number" placeholder="残玉" oninput="withupdateTenseiPreview()">
+<input id="remainBall" type="number" placeholder="残玉" oninput="updateTenseiPreview()">
 <input id="saveBall" type="number" placeholder="貯玉" oninput="updateTenseiPreview()">
 <input id="cashBall" type="number" placeholder="現金" oninput="updateTenseiPreview()">
 <input id="yameGame" type="number" placeholder="やめ" oninput="updateTenseiPreview()">
@@ -360,8 +373,11 @@ let hasHikimodoshi = false;
 let isHikimodoshiZon = false;    
 let hikimodoshiGameCount = 0;    
 
-/* ★新機能：リプレイ次ゲーム遊技管理フラグ */
+/* ★リプレイ次ゲーム遊技管理フラグ */
 let isReplayG = false;
+
+/* ★サウンドマスターON/OFF制御フラグ */
+let isSoundEnabled = true;
 
 let slotHistories = [];
 
@@ -374,11 +390,44 @@ function addSlotHistory(text) {
 }
 
 let audioCtx = null;
-function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+function initAudio() { 
+ if (!audioCtx) {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+ }
+ // スマホ等のブラウザ起因でコンテキストが中断（suspended）している場合、強制復帰を試みる
+ if (audioCtx && audioCtx.state === 'suspended') {
+  audioCtx.resume();
+ }
+}
+
+/* ★サウンドオンオフ切り替え＆システム強制再起動（レスキュー） */
+function toggleSound() {
+ initAudio();
+ const btn = document.getElementById("soundToggleBtn");
+ 
+ if (isSoundEnabled) {
+  isSoundEnabled = false;
+  if (btn) btn.innerText = "❌ サウンド: OFF";
+  if (audioCtx && audioCtx.state !== 'closed') {
+   audioCtx.resume(); // 切る時も状態自体は正常化させておく
+  }
+ } else {
+  isSoundEnabled = true;
+  if (btn) btn.innerText = "🔊 サウンド: ON";
+  // 万が一バグって消えた場合も、ここでresumeを呼び出すことで音声システムが強制再接続される
+  if (audioCtx) {
+   audioCtx.resume();
+  }
+  // テスト用にシステム再起動成功音をピッと鳴らす
+  playTone(880, 'sine', 0.1, 0.1);
+ }
+}
 
 function playTone(freq, type, duration, vol = 0.1) {
+ if (!isSoundEnabled) return; // サウンドオフ時は音を鳴らさない
  try {
   initAudio();
+  if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = type;
@@ -540,7 +589,7 @@ function getSerifuEffect(isHit, currentModeIndex) {
   }
  } else {
   let r = Math.random();
-  if (r < 0.3) text = "「何かが起きる予感……！」";
+  if (r < 0.3) text = "「何かが起きる予感……！強度アップか！？」";
   else if (r < 0.6) text = "「気配を感じる……。」";
   else text = "「……静かだな。」";
  }
@@ -554,14 +603,14 @@ function getSerifuEffect(isHit, currentModeIndex) {
 
 /* --- スロット実行メイン --- */
 function playSlot() {
- /* ★新機能：リプレイ次ゲーム遊技ロジック。前ゲームがリプレイなら消費は0枚 */
+ initAudio(); // タップに合わせて音声システムの生存チェック
+
+ /* リプレイ次ゲーム遊技ロジック。前ゲームがリプレイなら消費は0枚 */
  if (isReplayG) {
-  // 消費0枚
   isReplayG = false; 
  } else {
   netSamai -= 3; // 通常時は3枚消費
  }
- soundStart();
  
  // ================= ①最優先：払い出し＆特殊フラグ抽選 =================
  let randBonusFlags = Math.random();
@@ -586,7 +635,6 @@ function playSlot() {
 
  let triggerLock = false; // 今回のレバーで1秒ウエイトをかけるかどうかのフラグ
 
- // フラグの成立判定
  if (is777揃いフラグ) {
   roleName = "777揃い";
   reelStr = ["7️⃣", "7️⃣", "7️⃣"];
@@ -609,12 +657,10 @@ function playSlot() {
  let payout = 0;
  let medalDiffText = "-3枚"; 
 
- // ★リプレイフラグ管理の更新
  if (roleName === "リプレイ") {
   isReplayG = true; 
  }
 
- // 払い出し枚数の計算（★バグ修正：フェイクフラグの時だけ強制ハズレ表示に切り替える）
  let finalRoleDisplay = roleName;
  if (is77ハズレフラグ) {
   finalRoleDisplay = "ハズレ";
@@ -807,14 +853,13 @@ function playSlot() {
    soundBonusReady();
   } else if (czRemaining <= 0) {
    currentMode = "NORMAL";
-   internalMode = 3; // ★CZ失敗時は最高潮の超高確モードを引き継ぎ・移行！
+   internalMode = 3; // CZ失敗時は最高潮の超高確モードを引き継ぎ・移行！
    displayMsg = `<div>${payMsgHTML}</div><br><span style="color:gray">CZ失敗… 通常へ戻ります</span>`;
    document.getElementById("msgDisplay").innerHTML = displayMsg;
    addSlotHistory(`${normalGames}G → CZ失敗 → 通常へ(超高確移行)`);
    normalGames = 0;
    soundBonusEnd();
   } else {
-   // ★CZ中もハズレに化けさせず、毎ゲームの払い出し内容をしっかり液晶に反映させる！
    document.getElementById("msgDisplay").innerHTML = payMsgHTML;
   }
 
@@ -1083,7 +1128,7 @@ function playSlot() {
    battleState = "NONE";
    bonusStartSamai = netSamai; 
    triggerLock = true; 
-   displayMsg = `<div>${payMsgHTML}</div><br><span style='color:#e91e63; font-weight:bold;'>Σ(ﾟДﾟ) リプレイから1%を掴みBIG復帰！</span>`;
+   displayMsg = `<div>${payMsgHTML}</div><br><span style='color:#e91e63; font-weight:bold;'>👑 リプレイから1%を掴みBIG復帰！</span>`;
    document.getElementById("msgDisplay").innerHTML = displayMsg;
    addSlotHistory(`リザルト → BIG復帰（1%リプレイから/G数引き継ぎ！）`);
    soundUwanose告知();

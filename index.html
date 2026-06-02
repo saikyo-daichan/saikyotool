@@ -28,23 +28,13 @@ pre{white-space:pre-wrap}
 /* --- スロット用の拡張スタイル --- */
 .slot-header {
  display: flex;
- justify-content: space-between;
+ justify-content: flex-end;
  align-items: center;
  margin-bottom: 15px;
 }
-.slot-header button {
- width: auto;
- margin-bottom: 0;
- background-color: #ff9800;
- color: white;
- border: none;
- border-radius: 4px;
+.samai-display {
+ font-size: 18px;
  font-weight: bold;
-}
-.toushi-display {
- font-size: 16px;
- font-weight: bold;
- color: #d32f2f;
 }
 .status-panel {
  background: #f5f5f5;
@@ -104,12 +94,6 @@ pre{white-space:pre-wrap}
  justify-content: center;
  flex-direction: column;
  transition: background-color 0.3s, color 0.3s;
-}
-.medal-display {
- text-align: center;
- font-size: 20px;
- font-weight: bold;
- margin-bottom: 15px;
 }
 .play-btn {
  background-color: #4caf50;
@@ -176,8 +160,7 @@ pre{white-space:pre-wrap}
 
 <div id="slotArea" class="hidden">
  <div class="slot-header">
-  <button onclick="rentMedal()">貸し出し (46枚)</button>
-  <div id="toushiDisplay" class="toushi-display">投資 0円 (差枚: 0枚)</div>
+  <div id="samaiDisplay" class="samai-display">差枚: 0枚</div>
  </div>
 
  <div class="status-panel">
@@ -194,8 +177,6 @@ pre{white-space:pre-wrap}
  </div>
 
  <div id="msgDisplay" class="msg-display">レバーを叩け！</div>
-
- <div id="medalDisplay" class="medal-display">所持メダル: 0枚</div>
  
  <button class="play-btn" onclick="playSlot()">PLAY (-3枚)</button>
  
@@ -303,9 +284,7 @@ let resultText="";
 let tenseiHistory=[];
 
 /* --- スロット用の内部変数 --- */
-let myMedal = 0;
-let netSamai = 0; 
-const YEN_PER_MEDAL = 21.73913043478261; 
+let netSamai = 0; // 差枚数カウンター（メダル数に関係なく無限に回せます）
 
 let currentMode = "NORMAL"; 
 let normalGames = 0;
@@ -316,7 +295,7 @@ let regBellRemaining = 0;
 let nextBonusType = ""; 
 let regToBigUpgraded = false; 
 
-let bonusStartMedal = 0; 
+let bonusStartSamai = 0; 
 let lastCalculatedGain = 0; 
 
 let internalMode = 1; 
@@ -340,7 +319,7 @@ let isBZenchoHitActual = false;
 
 /* --- 引き戻しシステム用変数 --- */
 let hasHikimodoshi = false;      
-let hikimodoshiGameCount = 0;    // 引き戻しゾーンの現在の消化ゲーム数（1〜32G）
+let hikimodoshiGameCount = 0;    
 
 let slotHistories = [];
 
@@ -370,12 +349,12 @@ function playTone(freq, type, duration, vol = 0.1) {
  } catch(e) {}
 }
 
-function soundRent() { playTone(880, 'square', 0.05); setTimeout(() => playTone(1320, 'square', 0.05), 60); }
 function soundStart() { 
  playTone(300, 'sine', 0.05, 0.08); 
  setTimeout(() => playTone(600, 'sine', 0.08, 0.05), 40); 
 }
 function soundRare() { playTone(587, 'square', 0.06); setTimeout(() => playTone(880, 'square', 0.06), 60); setTimeout(() => playTone(1174, 'square', 0.1), 120); }
+function soundWinSmall() { playTone(987, 'triangle', 0.08); setTimeout(() => playTone(1318, 'triangle', 0.1), 80); }
 function soundBonusEnd() { playTone(200, 'sawtooth', 0.3); }
 function soundUwanose告知() {
  const scale = [880, 987, 1046, 1174, 1318, 1568];
@@ -421,16 +400,9 @@ function login(){
 }
 
 function updateSlotDisplay() {
- document.getElementById("medalDisplay").innerText = `所持メダル: ${myMedal}枚`;
- 
- let currentInvestmentYen = 0;
- if (netSamai < 0) {
-  currentInvestmentYen = Math.floor(Math.abs(netSamai) * YEN_PER_MEDAL);
- }
-
  let samaiColor = netSamai >= 0 ? "#00e676" : "#d32f2f";
  let samaiSign = netSamai >= 0 ? "+" : "";
- document.getElementById("toushiDisplay").innerHTML = `投資 ${currentInvestmentYen.toLocaleString()}円 <span style="color:${samaiColor};">(差枚: ${samaiSign}${netSamai}枚)</span>`;
+ document.getElementById("samaiDisplay").innerHTML = `<span style="color:${samaiColor};">差枚: ${samaiSign}${netSamai}枚</span>`;
  
  const stateEl = document.getElementById("slotState");
  const normalGEl = document.getElementById("normalGameCount");
@@ -495,7 +467,7 @@ function updateSlotDisplay() {
   }
  } else if (currentMode === "REG") {
   stateEl.innerText = "状態: 🔵REG BONUS🔵";
-  stateEl.style.color = "#00bcd4";
+  stateEl.style.color = "#00bcd4";Sub
   subGEl.innerText = `14枚ベル残り: ${regBellRemaining}回`;
   totalBBEl.style.display = "none";
  } else if (currentMode === "RESULT") {
@@ -506,11 +478,10 @@ function updateSlotDisplay() {
  }
 }
 
-/* --- ガチ信頼度セリフ生成関数 --- */
+/* --- セリフ生成関数 --- */
 function getSerifuEffect(isHit, currentModeIndex, isHikimodoshiMode = false) {
  let text = "「……レバーを叩くんだ！」";
  if (isHikimodoshiMode) {
-  // 引き戻しゾーン中のセリフ振り分け
   let r = Math.random();
   if (isHit) {
    if (r < 0.3) text = "「何かが起きる予感……！」";
@@ -519,12 +490,11 @@ function getSerifuEffect(isHit, currentModeIndex, isHikimodoshiMode = false) {
   } else {
    if (r < 0.6) text = "「……静かだな。」";
    else if (r < 0.9) text = "「気配を感じる……。」";
-   else text = "「何かが起きる予感……！」（ガセ）";
+   else text = "「何かが起きる予感……！」";
   }
   return text;
  }
 
- // 通常時の前兆セリフ
  let seed = Math.random();
  if (isHit) {
   if (seed < 0.15) text = "「あっつい！あっつい！」"; 
@@ -533,9 +503,9 @@ function getSerifuEffect(isHit, currentModeIndex, isHikimodoshiMode = false) {
   else if (seed < 0.65) text = "「何かが起きる予感……！」"; 
   else text = "「気配を感じる……。」";
  } else {
-  if (seed < 0.01) text = "「あっつい！あっつい！」（ガセガッカリ）"; 
-  else if (seed < 0.05) text = "「このあとチャンスだぞ！」（ガセ）"; 
-  else if (seed < 0.40) text = "「何かが起きる予感……！」（ガセ）"; 
+  if (seed < 0.01) text = "「あっつい！あっつい！」"; 
+  else if (seed < 0.05) text = "「このあとチャンスだぞ！」"; 
+  else if (seed < 0.40) text = "「何かが起きる予感……！」"; 
   else if (seed < 0.70) text = "「気配を感じる……。」";
   else text = "「……静かだな。」";
  }
@@ -544,13 +514,7 @@ function getSerifuEffect(isHit, currentModeIndex, isHikimodoshiMode = false) {
 
 /* --- スロット実行メイン --- */
 function playSlot() {
- if (myMedal < 3) {
-  document.getElementById("msgDisplay").innerHTML = "<span style='color:red;'>❌ メダルが無いよ！<br>貸し出しを押してね</span>";
-  return;
- }
- 
- myMedal -= 3;
- netSamai -= 3; 
+ netSamai -= 3; // 所持数判定を撤廃し、押せばいつでも差枚をマイナスして始動！
  soundStart();
  
  let roll = Math.random();
@@ -585,22 +549,18 @@ function playSlot() {
  else if (roleName === "スイカ") { payout = 6; soundRare(); medalDiffText = "+6枚"; }
  else if (roleName === "チェリー") { payout = 2; soundRare(); medalDiffText = "+2枚"; }
  
- myMedal += payout;
  netSamai += payout; 
 
  let displayMsg = `<span style="font-size:20px; color:#333;">${roleName} [${medalDiffText}]</span>`;
 
- /* ================= 【最優先】引き戻しゾーンのガチ抽選制御 ================= */
+ /* ================= 引き戻しゾーンのガチ抽選制御 ================= */
  if (hasHikimodoshi) {
   hikimodoshiGameCount++;
   
   let isHitThisGame = false;
-  
   if (hikimodoshiGameCount <= 31) {
-   // 1〜31G目までは毎ゲーム 1/32 のガチ抽選
     if (Math.random() < 1/32) { isHitThisGame = true; }
   } else {
-   // 32G目まで一度も引けなかった場合は100%ここで引き戻し告知が発動する
    isHitThisGame = true;
   }
   
@@ -615,9 +575,9 @@ function playSlot() {
    currentMode = "BIG";
    bigRemaining = 30;
    totalBigGames = 0;
-   bigBattleGames = 0; // 引き戻し時は0Gスタート
+   bigBattleGames = 0; 
    battleState = "NONE";
-   bonusStartMedal = myMedal + 3; 
+   bonusStartSamai = netSamai; 
    normalGames = 0; 
    
    displayMsg = `<span style="font-size:24px; font-weight:bold; color:#ff0000;">⚠️フリーズ：BLACKOUT⚠️</span><br><span style="color:#fff; font-size:18px;">プスン……液晶消灯……<br>🔴裏引き戻しBIG BONUS復帰確定！ (0Gスタート)</span>`;
@@ -627,10 +587,9 @@ function playSlot() {
    document.getElementById("msgDisplay").innerHTML = displayMsg;
    return; 
   } else {
-   // 引き戻し非当選の当該ゲームセリフ演出
    let serifu = getSerifuEffect(false, internalMode, true);
    displayMsg += `<br><span style="color:#9c27b0; font-weight:bold;">${serifu}</span>`;
-   if (hikimodoshiGameCount >= 32) { hasHikimodoshi = false; hikimodoshiGameCount = 0; } // セーフティ
+   if (hikimodoshiGameCount >= 32) { hasHikimodoshi = false; hikimodoshiGameCount = 0; } 
   }
 
  /* ================= 通常モード ================= */
@@ -706,7 +665,6 @@ function playSlot() {
      displayMsg += `<br><span style="color:gray;">通常画面へ戻った（セリフ前兆終了）</span>`;
     }
    } else {
-    // 信頼度対応のガチ前兆演出セリフを生成
     let serifu = getSerifuEffect(isZenchoHit, internalMode, false);
     displayMsg += `<br><span style="color:#2196f3; font-weight:bold;">${serifu}</span>`;
    }
@@ -747,7 +705,7 @@ function playSlot() {
 
  /* ================= 確定画面 ================= */
  } else if (currentMode === "BONUS_READY") {
-  bonusStartMedal = myMedal + 3; 
+  bonusStartSamai = netSamai + 3; 
 
   if (nextBonusType === "777") {
    document.getElementById("reel1").innerText = "7️⃣";
@@ -846,7 +804,7 @@ function playSlot() {
    } else {
     if (bigRemaining <= 0) {
      currentMode = "RESULT";
-     lastCalculatedGain = myMedal - bonusStartMedal;
+     lastCalculatedGain = netSamai - bonusStartSamai;
      displayMsg += `<br><span style="color:#795548; font-size:20px;">📊 リザルト画面 📊<br>獲得枚数：${lastCalculatedGain}枚</span>`;
      addSlotHistory(`${totalBigGames}G → BIG終了（獲得:${lastCalculatedGain}枚）`);
     }
@@ -855,7 +813,6 @@ function playSlot() {
   } else if (battleState === "PRE") {
    bZenchoRemaining--;
    
-   // セリフ前兆演出
    let bSerifu = "「何かが近づいてくる気配がする……」";
    if (bZenchoRemaining === 1) bSerifu = "「よし、この先が敵の根城だ！」";
    displayMsg += `<br><span style="color:#9c27b0; font-weight:bold;">${bSerifu}</span>`;
@@ -877,7 +834,7 @@ function playSlot() {
      displayMsg += `<br><span style="color:gray;">「気のせいだったか……」通常の空間に戻る</span>`;
      if (bigRemaining <= 0) {
       currentMode = "RESULT";
-      lastCalculatedGain = myMedal - bonusStartMedal;
+      lastCalculatedGain = netSamai - bonusStartSamai;
       displayMsg += `<br><span style="color:#795548; font-size:20px;">📊 リザルト画面 📊<br>獲得枚数：${lastCalculatedGain}枚</span>`;
       addSlotHistory(`${totalBigGames}G → ガセ前兆スルーによりBB終了`);
      }
@@ -909,10 +866,9 @@ function playSlot() {
 
    if (Math.random() < winProb) { isBattleWin = true; }
    
-   // バトルのガチセリフ演出
    let fightSerifu = "「くらえ！全力の一撃！！」";
    if (battleCount === 2) fightSerifu = "「相手の動きが見切れてきたぞ！」";
-   if (battleCount === 3) fightSerifu = isBattleWin ? "「これで終わりだーー！」" : "「くっ、避けきれない……！」";
+   if (battleCount === 3) fightSerifu = isBattleWin ? "「これで終わりだーー！」" : "「くっ、避けきれない……！精度を上げねば！」";
    
    displayMsg += `<br><span style="color:#ff9800; font-weight:bold;">【${enemyType}戦 ${battleCount}/3G】${fightSerifu}</span>`;
    
@@ -928,7 +884,7 @@ function playSlot() {
      soundBonusEnd();
      if (bigRemaining <= 0) {
       currentMode = "RESULT";
-      lastCalculatedGain = myMedal - bonusStartMedal;
+      lastCalculatedGain = netSamai - bonusStartSamai;
       displayMsg += `<br><span style="color:#795548; font-size:20px;">📊 リザルト画面 📊<br>獲得枚数：${lastCalculatedGain}枚</span>`;
       addSlotHistory(`${totalBigGames}G → バトル敗北によりそのままBB終了`);
      }
@@ -970,7 +926,7 @@ function playSlot() {
   
   if (regBellRemaining <= 0) {
    currentMode = "RESULT";
-   lastCalculatedGain = myMedal - bonusStartMedal;
+   lastCalculatedGain = netSamai - bonusStartSamai;
    displayMsg += `<br><span style="color:#795548; font-size:20px;">📊 リザルト画面 📊<br>獲得枚数：${lastCalculatedGain}枚</span>`;
    addSlotHistory(`REG終了（獲得:${lastCalculatedGain}枚）`);
   }
@@ -985,7 +941,7 @@ function playSlot() {
    bigRemaining = 30;
    totalBigGames = 0;
    battleState = "NONE";
-   bonusStartMedal = myMedal + 3; 
+   bonusStartSamai = netSamai; 
    displayMsg = "<span style='color:#e91e63;'>✨幻影昇格演出発生！🔴BIG BONUS突入！</span>";
    addSlotHistory(`リザルト → 幻影昇格BIG当選（G数引き継ぎ！）`);
    soundUwanose告知();
@@ -997,7 +953,7 @@ function playSlot() {
    bigRemaining = 30;
    totalBigGames = 0;
    battleState = "NONE";
-   bonusStartMedal = myMedal + 3; 
+   bonusStartSamai = netSamai; 
    displayMsg = `<span style='color:#e91e63;'>⚡リザルト中レア役！🔴BIG BONUS復帰！</span>`;
    addSlotHistory(`リザルト → BIG復帰（${roleName}から/G数引き継ぎ！）`);
    soundUwanose告知();
@@ -1007,7 +963,7 @@ function playSlot() {
    bigRemaining = 30;
    totalBigGames = 0;
    battleState = "NONE";
-   bonusStartMedal = myMedal + 3; 
+   bonusStartSamai = netSamai; 
    displayMsg = "<span style='color:#e91e63;'>Σ(ﾟДﾟ) リプレイから1%を掴みBIG復帰！</span>";
    addSlotHistory(`リザルト → BIG復帰（1%リプレイから/G数引き継ぎ！）`);
    soundUwanose告知();
@@ -1020,10 +976,9 @@ function playSlot() {
    internalMode = 1; 
    soundBonusEnd();
    
-   // リざると画面を抜けるタイミングで、15%の確率で「32G間の裏引き戻しフラグ」をセット！
    if (Math.random() < 0.15) {
     hasHikimodoshi = true;
-    hikimodoshiGameCount = 0; // カウンターをゼロにリセット
+    hikimodoshiGameCount = 0; 
     addSlotHistory(`（内部状態：15%の引き戻しモードに当選！最大32G間の叩きどころ）`);
    } else {
     hasHikimodoshi = false;

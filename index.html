@@ -14,6 +14,17 @@ pre{white-space:pre-wrap}
 .row{display:flex;gap:8px}
 .row input{margin-bottom:0}
 .smallbtn{width:auto;padding:4px 8px;margin-left:8px}
+.grid3{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:10px;
+ margin-top:10px;
+ margin-bottom:30px; /* ★ここで9つのボタンの下にしっかり余白を空けました */
+}
+
+.grid3 button{
+ margin:0;
+}
 </style>
 </head>
 <body>
@@ -34,10 +45,40 @@ pre{white-space:pre-wrap}
 <div id="kouryakuArea" class="hidden">
 <h2>攻略</h2>
 
-<p>未設定</p>
+<div class="grid3">
+<button onclick="showKouryakuPage('北斗転生2')">北斗転生2</button>
+<button onclick="showKouryakuPage('鉄拳6')">鉄拳6</button>
+<button onclick="showKouryakuPage('北斗の拳')">北斗の拳</button>
+
+<button onclick="showKouryakuPage('ミリオンゴッド')">ミリオンゴッド</button>
+<button onclick="showKouryakuPage('マギアレコード')">マギアレコード</button>
+<button onclick="showKouryakuPage('未設定')">未設定</button>
+
+<button onclick="showKouryakuPage('未設定')">未設定</button>
+<button onclick="showKouryakuPage('未設定')">未設定</button>
+<button onclick="showKouryakuPage('未設定')">未設定</button>
+</div>
 
 <button onclick="showMenu()">戻る</button>
 </div>
+
+<div id="hokutoTensei2Area" class="hidden">
+<h2>北斗転生2</h2>
+
+<p>未設定</p>
+
+<button onclick="showKouryaku()">戻る</button>
+</div>
+
+
+<div id="tekken6Area" class="hidden"><h2>鉄拳6</h2><p>未設定</p><button onclick="showKouryaku()">戻る</button></div>
+<div id="hokutoArea" class="hidden"><h2>北斗の拳</h2><p>未設定</p><button onclick="showKouryaku()">戻る</button></div>
+<div id="godArea" class="hidden"><h2>ミリオンゴッド</h2><p>未設定</p><button onclick="showKouryaku()">戻る</button></div>
+<div id="magirecoArea" class="hidden"><h2>マギアレコード</h2><p>未設定</p><button onclick="showKouryaku()">戻る</button></div>
+<div id="unset1Area" class="hidden"><h2>未設定</h2><p>未設定</p><button onclick="showKouryaku()">戻る</button></div>
+<div id="unset2Area" class="hidden"><h2>未設定</h2><p>未設定</p><button onclick="showKouryaku()">戻る</button></div>
+<div id="unset3Area" class="hidden"><h2>未設定</h2><p>未設定</p><button onclick="showKouryaku()">戻る</button></div>
+<div id="unset4Area" class="hidden"><h2>未設定</h2><p>未設定</p><button onclick="showKouryaku()">戻る</button></div>
 
 <div id="tenseiArea" class="hidden">
 <h2>データ作成</h2>
@@ -117,7 +158,7 @@ window.onload=()=>{
 };
 
 function hideAll(){
- ["loginArea","menuArea","kouryakuArea","tenseiArea","seisanArea"].forEach(id=>{
+ ["loginArea","menuArea","kouryakuArea","hokutoTensei2Area","tekken6Area","hokutoArea","godArea","magirecoArea","unset1Area","unset2Area","unset3Area","unset4Area","tenseiArea","seisanArea"].forEach(id=>{
  document.getElementById(id).classList.add("hidden");
  });
 }
@@ -125,6 +166,23 @@ function showMenu(){hideAll();menuArea.classList.remove("hidden");}
 function showKouryaku(){hideAll();kouryakuArea.classList.remove("hidden");}
 function showTensei(){hideAll();tenseiArea.classList.remove("hidden");updateTenseiPreview();}
 function showSeisan(){hideAll();seisanArea.classList.remove("hidden");}
+function showHokutoTensei2(){hideAll();document.getElementById("hokutoTensei2Area").classList.remove("hidden");}
+function showKouryakuPage(name){
+ hideAll();
+ const map={
+  "北斗転生2":"hokutoTensei2Area",
+  "鉄拳6":"tekken6Area",
+  "北斗の拳":"hokutoArea",
+  "ミリオンゴッド":"godArea",
+  "マギアレコード":"magirecoArea"
+ };
+ if(map[name]){
+  document.getElementById(map[name]).classList.remove("hidden");
+ }else{
+  document.getElementById("unset1Area").classList.remove("hidden");
+ }
+}
+
 
 function login(){
  if(password.value===PASSWORD){

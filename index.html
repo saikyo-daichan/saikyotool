@@ -279,7 +279,7 @@ pre{white-space:pre-wrap}
 <select id="animal" onchange="updateTenseiPreview()"></select>
 <input id="startSpin" type="number" placeholder="回転数" oninput="updateTenseiPreview()">
 <input id="totalSpin" type="number" placeholder="総回転数" oninput="updateTenseiPreview()">
-<input id="remainBall" type="number" placeholder="残玉" oninput="updateTenseiPreview()">
+<input id="remainBall" type="number" placeholder="残玉" oninput="withupdateTenseiPreview()">
 <input id="saveBall" type="number" placeholder="貯玉" oninput="updateTenseiPreview()">
 <input id="cashBall" type="number" placeholder="現金" oninput="updateTenseiPreview()">
 <input id="yameGame" type="number" placeholder="やめ" oninput="updateTenseiPreview()">
@@ -360,6 +360,9 @@ let hasHikimodoshi = false;
 let isHikimodoshiZon = false;    
 let hikimodoshiGameCount = 0;    
 
+/* ★新機能：リプレイ次ゲーム遊技管理フラグ */
+let isReplayG = false;
+
 let slotHistories = [];
 
 function addSlotHistory(text) {
@@ -403,6 +406,11 @@ function soundBonusReady() {
  playTone(659, 'square', 0.1, 0.1);
  setTimeout(() => playTone(784, 'square', 0.1, 0.1), 80);
  setTimeout(() => playTone(987, 'square', 0.2, 0.15), 160);
+}
+function soundBonusStart() {
+  playTone(523, 'sawtooth', 0.15, 0.2);
+  setTimeout(() => playTone(659, 'sawtooth', 0.15, 0.2), 120);
+  setTimeout(() => playTone(784, 'sawtooth', 0.3, 0.25), 240);
 }
 function soundBattleStart() { playTone(440, 'sawtooth', 0.1); setTimeout(() => playTone(392, 'sawtooth', 0.1), 100); setTimeout(() => playTone(523, 'sawtooth', 0.3), 200); }
 function soundBlackout() {
@@ -546,7 +554,13 @@ function getSerifuEffect(isHit, currentModeIndex) {
 
 /* --- スロット実行メイン --- */
 function playSlot() {
- netSamai -= 3; 
+ /* ★新機能：リプレイ次ゲーム遊技ロジック。前ゲームがリプレイなら消費は0枚 */
+ if (isReplayG) {
+  // 消費0枚
+  isReplayG = false; 
+ } else {
+  netSamai -= 3; // 通常時は3枚消費
+ }
  soundStart();
  
  // ================= ①最優先：払い出し＆特殊フラグ抽選 =================
@@ -555,9 +569,9 @@ function playSlot() {
  let is77ハズレフラグ = false;
 
  if (currentMode === "BIG" && battleState === "NONE") {
-  if (randBonusFlags < 1 / 655) { // 確率を1/655に激重化！
+  if (randBonusFlags < 1 / 655) { 
    is777揃いフラグ = true;
-  } else if (randBonusFlags < (1 / 655) + (1 / 201)) { // フェイク確率を1/201に調整
+  } else if (randBonusFlags < (1 / 655) + (1 / 201)) { 
    is77ハズレフラグ = true;
   }
  }
@@ -572,12 +586,13 @@ function playSlot() {
 
  let triggerLock = false; // 今回のレバーで1秒ウエイトをかけるかどうかのフラグ
 
+ // フラグの成立判定
  if (is777揃いフラグ) {
   roleName = "777揃い";
   reelStr = ["7️⃣", "7️⃣", "7️⃣"];
-  triggerLock = true; // 7揃い時はフリーズロック
+  triggerLock = true; 
  } else if (is77ハズレフラグ) {
-  roleName = "ハズレ"; // ネタバレ防止
+  roleName = "ハズレ"; 
   reelStr = ["7️⃣", "7️⃣", "🦧"]; 
  } else {
   if (roll < 1/7) { roleName = "リプレイ"; reelStr = ["🔄", "🔄", "🔄"]; } 
@@ -594,6 +609,17 @@ function playSlot() {
  let payout = 0;
  let medalDiffText = "-3枚"; 
 
+ // ★リプレイフラグ管理の更新
+ if (roleName === "リプレイ") {
+  isReplayG = true; 
+ }
+
+ // 払い出し枚数の計算（★バグ修正：フェイクフラグの時だけ強制ハズレ表示に切り替える）
+ let finalRoleDisplay = roleName;
+ if (is77ハズレフラグ) {
+  finalRoleDisplay = "ハズレ";
+ }
+
  if (is777揃いフラグ) { payout = 0; medalDiffText = "±0枚"; soundUwanose告知(); }
  else if (is77ハズレフラグ) { payout = 0; medalDiffText = "-3枚"; }
  else if (roleName === "リプレイ") { payout = 0; medalDiffText = "±0枚"; }
@@ -605,7 +631,7 @@ function playSlot() {
  
  netSamai += payout; 
 
- let payMsgHTML = `<div>${roleName} [${medalDiffText}]</div>`;
+ let payMsgHTML = `<div>${finalRoleDisplay} [${medalDiffText}]</div>`;
 
  // ================= ②各モードの進行制御 =================
  
@@ -628,7 +654,7 @@ function playSlot() {
    isHikimodoshiZon = false;
    hikimodoshiGameCount = 0;
    soundBlackout();
-   triggerLock = true; // 復活フリーズ時も1秒ロック
+   triggerLock = true; 
    
    document.getElementById("slotReelsContainer").classList.add("blackout-reels");
    document.getElementById("msgDisplay").classList.add("blackout-msg");
@@ -710,11 +736,11 @@ function playSlot() {
     currentMode = "CZ";
     czRemaining = 10;
     zenchoRemaining = 0;
-    triggerLock = true; // CZ突入時は1秒ロック
+    triggerLock = true; 
     displayMsg = `<div>${payMsgHTML}</div><br><span style="color:#ff5722; font-weight:bold;">💥 セリフ前兆中確定役から即告知！CZ突入！ 💥</span>`;
     document.getElementById("msgDisplay").innerHTML = displayMsg;
     addSlotHistory(`${normalGames}G → CZ当選！[滞在:${MODE_NAMES[internalMode]}]`);
-    soundUwanose告知();
+    soundBonusReady();
     if (normalGames <= 199) { isLoopMode = false; }
     updateSlotDisplay();
     if (triggerLock) lockPlayButton();
@@ -735,11 +761,11 @@ function playSlot() {
     if (isZenchoHit) {
      currentMode = "CZ";
      czRemaining = 10;
-     triggerLock = true; // CZ突入時は1秒ロック
+     triggerLock = true; 
      displayMsg = `<div>${payMsgHTML}</div><br><span style="color:#ff5722; font-weight:bold;">💥 CZ「LAST 10G」突入！ 💥</span>`;
      document.getElementById("msgDisplay").innerHTML = displayMsg;
      addSlotHistory(`${normalGames}G → CZ当選！[滞在:${MODE_NAMES[internalMode]}]`);
-     soundUwanose告知();
+     soundBonusReady();
      
      if (triggeredBy300G) { isLoopMode = true; } 
      else if (normalGames >= 200 && isLoopMode) { isLoopMode = true; } 
@@ -774,25 +800,28 @@ function playSlot() {
   
   if (czSuccess) {
    currentMode = "BONUS_READY";
-   triggerLock = true; // ボーナス確定画面突入時は1秒ロック
+   triggerLock = true; 
    displayMsg = `<div>${payMsgHTML}</div><br><span style="color:#4caf50; font-weight:bold;">🎉 CZ突破成功！次ゲームボーナスを揃え！</span>`;
    document.getElementById("msgDisplay").innerHTML = displayMsg;
    addSlotHistory(`${normalGames}G → CZ突破成功（${czKiki}）`);
    soundBonusReady();
   } else if (czRemaining <= 0) {
    currentMode = "NORMAL";
-   internalMode = 3; // CZ失敗時は元の超高確モードを引き継ぎ・移行！
+   internalMode = 3; // ★CZ失敗時は最高潮の超高確モードを引き継ぎ・移行！
    displayMsg = `<div>${payMsgHTML}</div><br><span style="color:gray">CZ失敗… 通常へ戻ります</span>`;
    document.getElementById("msgDisplay").innerHTML = displayMsg;
    addSlotHistory(`${normalGames}G → CZ失敗 → 通常へ(超高確移行)`);
    normalGames = 0;
    soundBonusEnd();
+  } else {
+   // ★CZ中もハズレに化けさせず、毎ゲームの払い出し内容をしっかり液晶に反映させる！
+   document.getElementById("msgDisplay").innerHTML = payMsgHTML;
   }
 
  /* ================= 確定画面 ================= */
  } else if (currentMode === "BONUS_READY") {
   bonusStartSamai = netSamai + 3; 
-  triggerLock = true; // ボーナス開始時も1秒ロック
+  triggerLock = true; 
 
   document.getElementById("reel1").innerText = "7️⃣";
   document.getElementById("reel2").innerText = "7️⃣";
@@ -805,7 +834,7 @@ function playSlot() {
   displayMsg = `<div>${payMsgHTML}</div><br><span style="color:#e91e63; font-size:20px;">🔴 BIG BONUS スタート！ (50G)</span>`;
   document.getElementById("msgDisplay").innerHTML = displayMsg;
   addSlotHistory(`${normalGames}G → BIG突入`);
-  soundUwanose告知();
+  soundBonusStart();
 
  /* ================= BIG BONUS ================= */
  } else if (currentMode === "BIG") {
@@ -988,7 +1017,7 @@ function playSlot() {
    if (battleCount === 3) {
     if (isBattleWin) {
      battleState = "REWARD"; 
-     triggerLock = true; // バトル勝利時は1秒ロック発動！
+     triggerLock = true; 
      soundUwanose告知();
     } else {
      battleState = "NONE";
@@ -1041,7 +1070,7 @@ function playSlot() {
    totalBigGames = 0;
    battleState = "NONE";
    bonusStartSamai = netSamai; 
-   triggerLock = true; // リザルト復帰時も1秒ロック
+   triggerLock = true; 
    displayMsg = `<div>${payMsgHTML}</div><br><span style='color:#e91e63; font-weight:bold;'>⚡リザルト中レア役！🔴BIG BONUS復帰！</span>`;
    document.getElementById("msgDisplay").innerHTML = displayMsg;
    addSlotHistory(`リザルト → BIG復帰（${roleName}から/G数引き継ぎ！）`);
@@ -1053,7 +1082,7 @@ function playSlot() {
    totalBigGames = 0;
    battleState = "NONE";
    bonusStartSamai = netSamai; 
-   triggerLock = true; // リザルト復帰時も1秒ロック
+   triggerLock = true; 
    displayMsg = `<div>${payMsgHTML}</div><br><span style='color:#e91e63; font-weight:bold;'>Σ(ﾟДﾟ) リプレイから1%を掴みBIG復帰！</span>`;
    document.getElementById("msgDisplay").innerHTML = displayMsg;
    addSlotHistory(`リザルト → BIG復帰（1%リプレイから/G数引き継ぎ！）`);
@@ -1064,7 +1093,7 @@ function playSlot() {
   if (!revived) {
    currentMode = "NORMAL";
    normalGames = 0;
-   internalMode = 3; // ボーナス終了後も超高確モードを引き継ぎ・復帰！
+   internalMode = 3; // ★ボーナス終了後も超高確モードを引き継ぎ・移行！
    soundBonusEnd();
    
    isHikimodoshiZon = true; 
@@ -1084,7 +1113,7 @@ function playSlot() {
  }
 
  updateSlotDisplay();
- if (triggerLock) lockPlayButton(); // フラグが立っていればボタンを1秒ロック
+ if (triggerLock) lockPlayButton(); 
 }
 
 function updateAnimalOptions(){

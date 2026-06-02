@@ -2,10 +2,10 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>最強ツール</title>
 <style>
-body{font-family:sans-serif;max-width:700px;margin:auto;padding:20px}
+body{font-family:sans-serif;max-width:700px;margin:auto;padding:20px;padding-bottom:100px;} /* ボタン固定用に下部余白確保 */
 input,select,button{width:100%;padding:12px;margin-bottom:10px;box-sizing:border-box}
 button{cursor:pointer}
 .hidden{display:none}
@@ -79,14 +79,12 @@ pre{white-space:pre-wrap}
  height: 60px;
  line-height: 60px;
 }
-
-/* ★ボタンの位置を固定するため、高さを120pxに固定＆中央配置に */
 .msg-display {
  text-align: center;
  font-size: 18px;
  font-weight: bold;
  color: #3f51b5;
- height: 120px; 
+ min-height: 80px; 
  box-sizing: border-box;
  margin-bottom: 10px;
  background: #e8eaf6;
@@ -96,19 +94,44 @@ pre{white-space:pre-wrap}
  align-items: center;
  justify-content: center;
  flex-direction: column;
- gap: 8px;
- overflow: hidden;
+ gap: 6px;
  transition: background-color 0.3s, color 0.3s;
+}
+
+/* ★スマホ対応：PLAYボタンを下部にガチガチの完全固定固定 */
+.play-btn-container {
+ position: fixed;
+ bottom: 0;
+ left: 0;
+ width: 100%;
+ background: rgba(255, 255, 255, 0.95);
+ padding: 10px 20px;
+ box-sizing: border-box;
+ border-top: 2px solid #ccc;
+ z-index: 9999;
+ display: flex;
+ justify-content: center;
 }
 .play-btn {
  background-color: #4caf50;
  color: white;
  border: none;
- font-size: 20px;
+ font-size: 22px;
  font-weight: bold;
  border-radius: 8px;
  padding: 15px;
+ width: 100%;
+ max-width: 660px;
+ box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+ -webkit-tap-highlight-color: transparent;
 }
+.play-btn:disabled {
+ background-color: #757575 !important;
+ color: #b0bec5 !important;
+ cursor: not-allowed;
+ box-shadow: none;
+}
+
 .slot-history-box {
  background: #263238;
  color: #00e676;
@@ -117,7 +140,7 @@ pre{white-space:pre-wrap}
  border-radius: 6px;
  margin-top: 15px;
  margin-bottom: 15px;
- max-height: 180px;
+ max-height: 140px;
  overflow-y: auto;
  font-size: 14px;
  line-height: 1.5;
@@ -191,7 +214,10 @@ pre{white-space:pre-wrap}
 
  <div id="msgDisplay" class="msg-display"><div>レバーを叩け！</div></div>
  
- <button class="play-btn" onclick="playSlot()">PLAY (-3枚)</button>
+ <!-- 完全位置固定用のコンテナラッピング -->
+ <div class="play-btn-container">
+  <button id="mainPlayBtn" class="play-btn" onclick="playSlot()">PLAY (-3枚)</button>
+ </div>
  
  <div class="slot-history-box">
   <div class="slot-history-title">📊 スロットデータ履歴 (最新順)</div>
@@ -374,10 +400,25 @@ function soundUwanose告知() {
  const scale = [880, 987, 1046, 1174, 1318, 1568];
  scale.forEach((f, i) => setTimeout(() => playTone(f, 'square', 0.08, 0.15), i * 50));
 }
+function soundBonusReady() {
+ playTone(659, 'square', 0.1, 0.1);
+ setTimeout(() => playTone(784, 'square', 0.1, 0.1), 80);
+ setTimeout(() => playTone(987, 'square', 0.2, 0.15), 160);
+}
 function soundBattleStart() { playTone(440, 'sawtooth', 0.1); setTimeout(() => playTone(392, 'sawtooth', 0.1), 100); setTimeout(() => playTone(523, 'sawtooth', 0.3), 200); }
 function soundBlackout() {
  playTone(150, 'sawtooth', 0.5, 0.3);
  setTimeout(() => playTone(100, 'sawtooth', 0.8, 0.4), 200);
+}
+
+/* ★ボタンの1秒ロック（フリーズウエイト）処理関数 */
+function lockPlayButton() {
+ const btn = document.getElementById("mainPlayBtn");
+ if (!btn) return;
+ btn.disabled = true;
+ setTimeout(() => {
+  btn.disabled = false;
+ }, 1000); // 1秒ロック
 }
 
 window.onload=()=>{
@@ -515,9 +556,9 @@ function playSlot() {
  let is77ハズレフラグ = false;
 
  if (currentMode === "BIG" && battleState === "NONE") {
-  if (randBonusFlags < 1 / 155) {
+  if (randBonusFlags < 1 / 655) { // 確率を1/655に激重化！
    is777揃いフラグ = true;
-  } else if (randBonusFlags < (1 / 155) + (1 / 55)) {
+  } else if (randBonusFlags < (1 / 655) + (1 / 201)) { // フェイク確率を1/201に調整
    is77ハズレフラグ = true;
   }
  }
@@ -530,18 +571,21 @@ function playSlot() {
  let bell8Prob = (currentMode === "CZ") ? (1 / 3.3) : (isBonus ? (1 / 2.6) : (1 / 22)); 
  let bell3Prob = isBonus ? (1 / 2.6) : (1 / 6);
 
+ let triggerLock = false; // 今回のレバーで1秒ウエイトをかけるかどうかのフラグ
+
  if (is777揃いフラグ) {
   roleName = "777揃い";
   reelStr = ["7️⃣", "7️⃣", "7️⃣"];
+  triggerLock = true; // 7揃い時はフリーズロック
  } else if (is77ハズレフラグ) {
-  roleName = "77フェイク";
+  roleName = "ハズレ"; // ネタバレ防止
   reelStr = ["7️⃣", "7️⃣", "🦧"]; 
  } else {
   if (roll < 1/7) { roleName = "リプレイ"; reelStr = ["🔄", "🔄", "🔄"]; } 
   else if (roll < 1/7 + bell3Prob) { roleName = "3枚ベル"; reelStr = ["🔔", "🔔", "🔔"]; } 
   else if (roll < 1/7 + bell3Prob + bell8Prob) { roleName = isBonus ? "14枚ベル" : "8枚ベル"; reelStr = ["🟡", "🟡", "🟡"]; } 
-  else if (roll < 1/7 + bell3Prob + bell8Prob + 1/64) { roleName = "スイカ"; reelStr = ["🍉", "🍉", "🍉"]; } 
-  else if (roll < 1/7 + bell3Prob + bell8Prob + 1/64 + 1/128) { roleName = "チェリー"; reelStr = ["🍒", "🦧", "🦧"]; }
+  else if (roll < 1/7 + bell3Prob + bell8Prob + 1/64) { roleName = "スイカ"; reelStr = ["🍉", "🍉", "🍉"]; triggerLock = true; } 
+  else if (roll < 1/7 + bell3Prob + bell8Prob + 1/64 + 1/128) { roleName = "チェリー"; reelStr = ["🍒", "🦧", "🦧"]; triggerLock = true; }
  }
 
  document.getElementById("reel1").innerText = reelStr[0];
@@ -551,7 +595,6 @@ function playSlot() {
  let payout = 0;
  let medalDiffText = "-3枚"; 
 
- // ★リールメッセージから「フェイク」等のネタバレ文字を排除しスッキリ化
  if (is777揃いフラグ) { payout = 0; medalDiffText = "±0枚"; soundUwanose告知(); }
  else if (is77ハズレフラグ) { payout = 0; medalDiffText = "-3枚"; }
  else if (roleName === "リプレイ") { payout = 0; medalDiffText = "±0枚"; }
@@ -563,12 +606,11 @@ function playSlot() {
  
  netSamai += payout; 
 
- // 小役情報を上部に配置
  let payMsgHTML = `<div>${roleName} [${medalDiffText}]</div>`;
 
  // ================= ②各モードの進行制御 =================
  
- /* --- A. 引き戻しゾーン制御（32G固定・終わったかどうか分からせないフェードアウト仕様） --- */
+ /* --- A. 引き戻しゾーン制御（32G固定・完全ステルス） --- */
  if (isHikimodoshiZon) {
   normalGames++; 
   hikimodoshiGameCount++;
@@ -587,6 +629,7 @@ function playSlot() {
    isHikimodoshiZon = false;
    hikimodoshiGameCount = 0;
    soundBlackout();
+   triggerLock = true; // 復活フリーズ時も1秒ロック
    
    document.getElementById("slotReelsContainer").classList.add("blackout-reels");
    document.getElementById("msgDisplay").classList.add("blackout-msg");
@@ -604,6 +647,7 @@ function playSlot() {
    
    updateSlotDisplay();
    document.getElementById("msgDisplay").innerHTML = displayMsg;
+   if (triggerLock) lockPlayButton();
    return; 
   } else {
    let serifuHTML = "";
@@ -615,7 +659,6 @@ function playSlot() {
     nextSerifuInterval--;
    }
    
-   // ★「通常画面に戻った」という文字は完全に廃止。勝手にフェードアウトして通常に滑り込む
    if (hikimodoshiGameCount >= 32) { 
     isHikimodoshiZon = false; 
     hasHikimodoshi = false; 
@@ -668,12 +711,14 @@ function playSlot() {
     currentMode = "CZ";
     czRemaining = 10;
     zenchoRemaining = 0;
+    triggerLock = true; // CZ突入時は1秒ロック
     displayMsg = `<div>${payMsgHTML}</div><br><span style="color:#ff5722; font-weight:bold;">💥 セリフ前兆中確定役から即告知！CZ突入！ 💥</span>`;
     document.getElementById("msgDisplay").innerHTML = displayMsg;
     addSlotHistory(`${normalGames}G → CZ当選（前兆中強演出から）`);
     soundUwanose告知();
     if (normalGames <= 199) { isLoopMode = false; }
     updateSlotDisplay();
+    if (triggerLock) lockPlayButton();
     return;
    } else if (zenchoRemaining === 0) {
     isZenchoHit = rareHit;
@@ -691,6 +736,7 @@ function playSlot() {
     if (isZenchoHit) {
      currentMode = "CZ";
      czRemaining = 10;
+     triggerLock = true; // CZ突入時は1秒ロック
      displayMsg = `<div>${payMsgHTML}</div><br><span style="color:#ff5722; font-weight:bold;">💥 CZ「LAST 10G」突入！ 💥</span>`;
      document.getElementById("msgDisplay").innerHTML = displayMsg;
      addSlotHistory(`${normalGames}G → CZ当選（${zenchoTriggerSource}から）`);
@@ -700,9 +746,8 @@ function playSlot() {
      else if (normalGames >= 200 && isLoopMode) { isLoopMode = true; } 
      else if (normalGames <= 199) { isLoopMode = false; }
      updateSlotDisplay();
+     if (triggerLock) lockPlayButton();
      return;
-    } else {
-     // ★ガセ終了通知を完全排除
     }
    } else {
     if (nextSerifuInterval <= 0) {
@@ -723,23 +768,18 @@ function playSlot() {
   let czKiki = "";
   
   let czRoll = Math.random();
-  if (roleName === "チェリー") {
-   czSuccess = true; 
-   czKiki = "チェリー（突破濃厚！）";
-  } else if (roleName === "スイカ") {
-   if (czRoll < 0.75) { czSuccess = true; czKiki = "スイカ(75%)"; }
-  } else if (roleName === "リプレイ") {
-   if (czRoll < 0.40) { czSuccess = true; czKiki = "リプレイ(40%)"; }
-  } else {
-   if (czRoll < 0.05) { czSuccess = true; czKiki = `${roleName}(5%の奇跡)`; }
-  }
+  if (roleName === "チェリー") { czSuccess = true; czKiki = "チェリー（突破濃厚！）"; } 
+  else if (roleName === "スイカ") { if (czRoll < 0.75) { czSuccess = true; czKiki = "スイカ(75%)"; } } 
+  else if (roleName === "リプレイ") { if (czRoll < 0.40) { czSuccess = true; czKiki = "リプレイ(40%)"; } } 
+  else { if (czRoll < 0.05) { czSuccess = true; czKiki = `${roleName}(5%の奇跡)`; } }
   
   if (czSuccess) {
    currentMode = "BONUS_READY";
+   triggerLock = true; // ボーナス確定画面突入時は1秒ロック
    displayMsg = `<div>${payMsgHTML}</div><br><span style="color:#4caf50; font-weight:bold;">🎉 CZ突破成功！次ゲームボーナスを揃え！</span>`;
    document.getElementById("msgDisplay").innerHTML = displayMsg;
    addSlotHistory(`${normalGames}G → CZ突破成功（${czKiki}）`);
-   soundUwanose告知();
+   soundBonusReady();
   } else if (czRemaining <= 0) {
    currentMode = "NORMAL";
    internalMode = 1; 
@@ -753,6 +793,7 @@ function playSlot() {
  /* ================= 確定画面 ================= */
  } else if (currentMode === "BONUS_READY") {
   bonusStartSamai = netSamai + 3; 
+  triggerLock = true; // ボーナス開始時も1秒ロック
 
   document.getElementById("reel1").innerText = "7️⃣";
   document.getElementById("reel2").innerText = "7️⃣";
@@ -782,9 +823,6 @@ function playSlot() {
     bigRemaining += addG;
     currentRewardHTML = `<div style="color:#e91e63; font-weight:bold; font-size:22px;">🟩7️⃣7️⃣7️⃣揃い炸裂！！ 上乗せ +${addG}G！</div>`;
     addSlotHistory(`BB中 白熱の7揃いから直乗せ +${addG}G！`);
-    soundUwanose告知();
-   } else if (is77ハズレフラグ) {
-    currentRewardHTML = `<div style="color:#7f8c8d; font-weight:bold; font-size:16px;">（7揃いあおりハズレ）</div>`;
    }
 
    let isBattleHit = false; 
@@ -900,7 +938,6 @@ function playSlot() {
      soundBattleStart();
     } else {
      battleState = "NONE";
-     // ★ガセ終了の文字を排除
      if (bigRemaining <= 0) {
       currentMode = "RESULT";
       lastCalculatedGain = netSamai - bonusStartSamai;
@@ -952,6 +989,7 @@ function playSlot() {
    if (battleCount === 3) {
     if (isBattleWin) {
      battleState = "REWARD"; 
+     triggerLock = true; // バトル勝利時は1秒ロック発動！
      soundUwanose告知();
     } else {
      battleState = "NONE";
@@ -1004,6 +1042,7 @@ function playSlot() {
    totalBigGames = 0;
    battleState = "NONE";
    bonusStartSamai = netSamai; 
+   triggerLock = true; // リザルト復帰時も1秒ロック
    displayMsg = `<div>${payMsgHTML}</div><br><span style='color:#e91e63; font-weight:bold;'>⚡リザルト中レア役！🔴BIG BONUS復帰！</span>`;
    document.getElementById("msgDisplay").innerHTML = displayMsg;
    addSlotHistory(`リザルト → BIG復帰（${roleName}から/G数引き継ぎ！）`);
@@ -1015,6 +1054,7 @@ function playSlot() {
    totalBigGames = 0;
    battleState = "NONE";
    bonusStartSamai = netSamai; 
+   triggerLock = true; // リザルト復帰時も1秒ロック
    displayMsg = `<div>${payMsgHTML}</div><br><span style='color:#e91e63; font-weight:bold;'>Σ(ﾟДﾟ) リプレイから1%を掴みBIG復帰！</span>`;
    document.getElementById("msgDisplay").innerHTML = displayMsg;
    addSlotHistory(`リザルト → BIG復帰（1%リプレイから/G数引き継ぎ！）`);
@@ -1028,7 +1068,6 @@ function playSlot() {
    internalMode = 1; 
    soundBonusEnd();
    
-   // 【仕様戻し】32G間のステルス引き戻し区間へ
    isHikimodoshiZon = true; 
    hikimodoshiGameCount = 0;
    nextSerifuInterval = 0; 
@@ -1041,12 +1080,12 @@ function playSlot() {
     addSlotHistory(`（内部状態：引き戻し非当選・ガセ引き戻し前兆スタート）`);
    }
    
-   // 通常に滑り込ませる
    document.getElementById("msgDisplay").innerHTML = payMsgHTML;
   }
  }
 
  updateSlotDisplay();
+ if (triggerLock) lockPlayButton(); // フラグが立っていればボタンを1秒ロック
 }
 
 function updateAnimalOptions(){

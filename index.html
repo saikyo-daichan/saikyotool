@@ -116,8 +116,7 @@ pre{white-space:pre-wrap}
  overflow-y: auto;
  font-size: 14px;
  line-height: 1.5;
- box-shadow: inset 0 0 5px #000;
-}
+ box-shadow: inset 0 0 5px #000}
 .slot-history-title {
  color: #fff;
  font-weight: bold;
@@ -284,7 +283,8 @@ let resultText="";
 let tenseiHistory=[];
 
 /* --- スロット用の内部変数 --- */
-let netSamai = 0; // 差枚数カウンター（メダル数に関係なく無限に回せます）
+let netSamai = 0; 
+const YEN_PER_MEDAL = 21.73913043478261; 
 
 let currentMode = "NORMAL"; 
 let normalGames = 0;
@@ -389,7 +389,7 @@ function showSeisan(){hideAll(); document.getElementById("seisanArea").classList
 
 function showKouryakuPage(name){
  hideAll();
- const map={"北斗転生2":"hokutoTensei2Area","鉄拳6":"tekken6Area","北斗の拳":"hokutoArea","ミリオンゴッド":"godArea","マギアレコード":"magirecoArea"};
+ const map={"北斗転生2":"hokutoTensei2Area","鉄拳6":"tekken6Area","北斗の拳":"hokutoArea","ミリオンゴッド":"godArea","magirecoArea":"magirecoArea"};
  if(map[name]) document.getElementById(map[name]).classList.remove("hidden");
  else document.getElementById("unset1Area").classList.remove("hidden");
 }
@@ -467,7 +467,7 @@ function updateSlotDisplay() {
   }
  } else if (currentMode === "REG") {
   stateEl.innerText = "状態: 🔵REG BONUS🔵";
-  stateEl.style.color = "#00bcd4";Sub
+  stateEl.style.color = "#00bcd4";
   subGEl.innerText = `14枚ベル残り: ${regBellRemaining}回`;
   totalBBEl.style.display = "none";
  } else if (currentMode === "RESULT") {
@@ -514,9 +514,10 @@ function getSerifuEffect(isHit, currentModeIndex, isHikimodoshiMode = false) {
 
 /* --- スロット実行メイン --- */
 function playSlot() {
- netSamai -= 3; // 所持数判定を撤廃し、押せばいつでも差枚をマイナスして始動！
+ netSamai -= 3; 
  soundStart();
  
+ // ================= [修正ポイント1] 払い出し判定を完全に最上位に独立配置 =================
  let roll = Math.random();
  let roleName = "ハズレ";
  let reelStr = ["🍒", "🍉", "🔔"]; 
@@ -525,7 +526,7 @@ function playSlot() {
  
  let bell8Prob = 1 / 22;
  if (currentMode === "CZ") { bell8Prob = 1 / 3.3; } 
- else if (isBonus) { bell8Prob = 1 / 2.6; }
+ else if (isBonus) { bell8Prob = 1 / 2.6; } // ボーナス中は14枚ベル高確率
  
  let bell3Prob = isBonus ? (1 / 2.6) : (1 / 6);
 
@@ -553,10 +554,11 @@ function playSlot() {
 
  let displayMsg = `<span style="font-size:20px; color:#333;">${roleName} [${medalDiffText}]</span>`;
 
- /* ================= 引き戻しゾーンのガチ抽選制御 ================= */
+ // ================= [修正ポイント2] 払い出し確定後に、各状態のゲーム数を処理 =================
+ 
+ /* --- A. 引き戻しゾーンのガチ抽選制御 --- */
  if (hasHikimodoshi) {
   hikimodoshiGameCount++;
-  
   let isHitThisGame = false;
   if (hikimodoshiGameCount <= 31) {
     if (Math.random() < 1/32) { isHitThisGame = true; }
@@ -592,7 +594,7 @@ function playSlot() {
    if (hikimodoshiGameCount >= 32) { hasHikimodoshi = false; hikimodoshiGameCount = 0; } 
   }
 
- /* ================= 通常モード ================= */
+ /* --- B. 通常モード --- */
  } else if (currentMode === "NORMAL") {
   normalGames++;
   
@@ -670,8 +672,8 @@ function playSlot() {
    }
   }
 
- /* ================= チャンスゾーン(CZ) ================= */
- } else if (currentMode === "CZ") {
+ /* --- C. チャンスゾーン(CZ) --- */
+  } else if (currentMode === "CZ") {
   czRemaining--;
   let czSuccess = false;
   let czKiki = "";
@@ -703,9 +705,9 @@ function playSlot() {
    soundBonusEnd();
   }
 
- /* ================= 確定画面 ================= */
+ /* --- D. ボーナス確定画面 --- */
  } else if (currentMode === "BONUS_READY") {
-  bonusStartSamai = netSamai + 3; 
+  bonusStartSamai = netSamai + 3; // PLAY開始直前の差枚を基準にセット
 
   if (nextBonusType === "777") {
    document.getElementById("reel1").innerText = "7️⃣";
@@ -730,7 +732,7 @@ function playSlot() {
   }
   soundUwanose告知();
 
- /* ================= BIG BONUS ================= */
+ /* --- E. BIG BONUS --- */
  } else if (currentMode === "BIG") {
   totalBigGames++;
 
@@ -880,7 +882,7 @@ function playSlot() {
     } else {
      battleState = "NONE";
      bigBattleGames = 0; 
-     displayMsg += `<br><span style="color:#d32f2f;">❌ バトル敗北… 通常ボーナスへ戻ります</span>`;
+     displayMsg += `<br><span style="color:#d32f2f;">❌ バトル敗落… 通常ボーナスへ戻ります</span>`;
      soundBonusEnd();
      if (bigRemaining <= 0) {
       currentMode = "RESULT";
@@ -916,9 +918,12 @@ function playSlot() {
    bigBattleGames++;
   }
 
- /* ================= REG BONUS ================= */
+ /* --- F. REG BONUS --- */
  } else if (currentMode === "REG") {
-  if (roleName === "14枚ベル") { regBellRemaining--; }
+  // REG中のみ、14枚ベル成立でしっかりと規定回数カウンターをマイナス
+  if (roleName === "14枚ベル") { 
+   regBellRemaining--; 
+  }
   
   let upgradeRoll = Math.random();
   if (roleName === "スイカ" && upgradeRoll < 0.0625) regToBigUpgraded = true;
@@ -931,7 +936,7 @@ function playSlot() {
    addSlotHistory(`REG終了（獲得:${lastCalculatedGain}枚）`);
   }
 
- /* ================= リザルト画面 ================= */
+ /* --- G. リザルト画面 --- */
  } else if (currentMode === "RESULT") {
   let r = Math.random();
   let revived = false;

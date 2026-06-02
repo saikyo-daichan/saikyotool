@@ -26,14 +26,17 @@ pre{white-space:pre-wrap}
 
 <div id="menuArea" class="hidden">
 <h2 class="appTitle"></h2>
-<button onclick="showTensei()">台データ作成</button>
-<button onclick="showSeisan()">精算</button>
-<div id="menuArea" class="hidden">
-<h2 class="appTitle"></h2>
-<button onclick="showTensei()">台データ作成</button>
-<button onclick="showSeisan()">精算</button>
 <button onclick="showKouryaku()">攻略</button>
+<button onclick="showTensei()">台データ作成</button>
+<button onclick="showSeisan()">精算</button>
 </div>
+
+<div id="kouryakuArea" class="hidden">
+<h2>攻略</h2>
+
+<p>未設定</p>
+
+<button onclick="showMenu()">戻る</button>
 </div>
 
 <div id="tenseiArea" class="hidden">
@@ -97,15 +100,7 @@ pre{white-space:pre-wrap}
 <pre id="output"></pre>
 <button onclick="showMenu()">戻る</button>
 </div>
-
-<div id="kouryakuArea" class="hidden">
-<h2>攻略</h2>
-
-<p>未設定</p>
-
-<button onclick="showMenu()">戻る</button>
-</div>
-
+ 
 <script>
 const APP_NAME="最強ツール";
 const PASSWORD="120708";
@@ -122,11 +117,12 @@ window.onload=()=>{
 };
 
 function hideAll(){
- ["loginArea","menuArea","tenseiArea","seisanArea"].forEach(id=>{
+ ["loginArea","menuArea","kouryakuArea","tenseiArea","seisanArea"].forEach(id=>{
  document.getElementById(id).classList.add("hidden");
  });
 }
 function showMenu(){hideAll();menuArea.classList.remove("hidden");}
+function showKouryaku(){hideAll();kouryakuArea.classList.remove("hidden");}
 function showTensei(){hideAll();tenseiArea.classList.remove("hidden");updateTenseiPreview();}
 function showSeisan(){hideAll();seisanArea.classList.remove("hidden");}
 

@@ -214,7 +214,6 @@ pre{white-space:pre-wrap}
 
  <div id="msgDisplay" class="msg-display"><div>レバーを叩け！</div></div>
  
- <!-- 完全位置固定用のコンテナラッピング -->
  <div class="play-btn-container">
   <button id="mainPlayBtn" class="play-btn" onclick="playSlot()">PLAY (-3枚)</button>
  </div>
@@ -714,7 +713,7 @@ function playSlot() {
     triggerLock = true; // CZ突入時は1秒ロック
     displayMsg = `<div>${payMsgHTML}</div><br><span style="color:#ff5722; font-weight:bold;">💥 セリフ前兆中確定役から即告知！CZ突入！ 💥</span>`;
     document.getElementById("msgDisplay").innerHTML = displayMsg;
-    addSlotHistory(`${normalGames}G → CZ当選（前兆中強演出から）`);
+    addSlotHistory(`${normalGames}G → CZ当選！[滞在:${MODE_NAMES[internalMode]}]`);
     soundUwanose告知();
     if (normalGames <= 199) { isLoopMode = false; }
     updateSlotDisplay();
@@ -739,7 +738,7 @@ function playSlot() {
      triggerLock = true; // CZ突入時は1秒ロック
      displayMsg = `<div>${payMsgHTML}</div><br><span style="color:#ff5722; font-weight:bold;">💥 CZ「LAST 10G」突入！ 💥</span>`;
      document.getElementById("msgDisplay").innerHTML = displayMsg;
-     addSlotHistory(`${normalGames}G → CZ当選（${zenchoTriggerSource}から）`);
+     addSlotHistory(`${normalGames}G → CZ当選！[滞在:${MODE_NAMES[internalMode]}]`);
      soundUwanose告知();
      
      if (triggeredBy300G) { isLoopMode = true; } 
@@ -782,10 +781,10 @@ function playSlot() {
    soundBonusReady();
   } else if (czRemaining <= 0) {
    currentMode = "NORMAL";
-   internalMode = 1; 
+   internalMode = 3; // CZ失敗時は元の超高確モードを引き継ぎ・移行！
    displayMsg = `<div>${payMsgHTML}</div><br><span style="color:gray">CZ失敗… 通常へ戻ります</span>`;
    document.getElementById("msgDisplay").innerHTML = displayMsg;
-   addSlotHistory(`${normalGames}G → CZ失敗 → 通常へ`);
+   addSlotHistory(`${normalGames}G → CZ失敗 → 通常へ(超高確移行)`);
    normalGames = 0;
    soundBonusEnd();
   }
@@ -1065,7 +1064,7 @@ function playSlot() {
   if (!revived) {
    currentMode = "NORMAL";
    normalGames = 0;
-   internalMode = 1; 
+   internalMode = 3; // ボーナス終了後も超高確モードを引き継ぎ・復帰！
    soundBonusEnd();
    
    isHikimodoshiZon = true; 

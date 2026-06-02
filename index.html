@@ -336,10 +336,11 @@ let battleState = "NONE";
 let battleCount = 0;          
 let enemyType = "";           
 let isBattleWin = false;      
+let isBZenchoHitActual = false; 
 
 /* --- 引き戻しシステム用変数 --- */
-let hasHikimodoshi = false;      // 引き戻し権利を持っているか
-let hikimodoshiGame = 0;         // 何G目に引き戻しを発動させるか
+let hasHikimodoshi = false;      
+let hikimodoshiGameCount = 0;    // 引き戻しゾーンの現在の消化ゲーム数（1〜32G）
 
 let slotHistories = [];
 
@@ -375,7 +376,6 @@ function soundStart() {
  setTimeout(() => playTone(600, 'sine', 0.08, 0.05), 40); 
 }
 function soundRare() { playTone(587, 'square', 0.06); setTimeout(() => playTone(880, 'square', 0.06), 60); setTimeout(() => playTone(1174, 'square', 0.1), 120); }
-function soundWinSmall() { playTone(987, 'triangle', 0.08); setTimeout(() => playTone(1318, 'triangle', 0.1), 80); }
 function soundBonusEnd() { playTone(200, 'sawtooth', 0.3); }
 function soundUwanose告知() {
  const scale = [880, 987, 1046, 1174, 1318, 1568];
@@ -420,7 +420,6 @@ function login(){
  else alert("暗証番号が違います");
 }
 
-/* --- スロットの画面表示更新 --- */
 function updateSlotDisplay() {
  document.getElementById("medalDisplay").innerText = `所持メダル: ${myMedal}枚`;
  
@@ -438,14 +437,23 @@ function updateSlotDisplay() {
  const subGEl = document.getElementById("subGameCount");
  const totalBBEl = document.getElementById("totalBonusGameCount");
 
- // 通常画面のエフェクト初期化
  document.getElementById("slotReelsContainer").classList.remove("blackout-reels");
  document.getElementById("msgDisplay").classList.remove("blackout-msg");
 
  let loopStatusStr = isLoopMode ? " [天国ループ!?]" : "";
- normalGEl.innerText = `通常: ${normalGames}G${loopStatusStr}`;
  
- if (currentMode === "NORMAL") {
+ if (hasHikimodoshi) {
+  normalGEl.innerText = `引き戻しゾーン: ${hikimodoshiGameCount}/32G`;
+ } else {
+  normalGEl.innerText = `通常: ${normalGames}G${loopStatusStr}`;
+ }
+ 
+ if (hasHikimodoshi) {
+  stateEl.innerText = "状態: 🌌引き戻しゾーン（最大32G）🌌";
+  stateEl.style.color = "#9c27b0";
+  subGEl.innerText = "毎ゲーム1/32でガチ復帰抽選中！";
+  totalBBEl.style.display = "none";
+ } else if (currentMode === "NORMAL") {
   stateEl.innerText = "状態: 通常モード";
   stateEl.style.color = "#333";
   subGEl.innerText = "";
@@ -461,6 +469,7 @@ function updateSlotDisplay() {
   subGEl.innerText = `狙え! [${nextBonusType}]`;
   totalBBEl.style.display = "none";
  } else if (currentMode === "BIG") {
+  totalBigGames = Math.max(totalBigGames, 1);
   totalBBEl.innerText = `累計BB: ${totalBigGames}G`;
   totalBBEl.style.display = "block";
 
@@ -497,52 +506,43 @@ function updateSlotDisplay() {
  }
 }
 
-function rentMedal() {
- soundRent();
- myMedal += 46;
- updateSlotDisplay();
-}
-
-function generateZenchoEffect(isHit, currentModeIndex) {
- let color = "#2196f3"; 
- let word = ""; 
- let baseText = "液晶の周りがザワザワし始めている…";
- let seed = Math.random();
-
- if (isHit) {
-  if (seed < 0.04) { color = "#d32f2f"; baseText = "激アツの赤セリフが発生！！"; } 
-  else if (seed < 0.06) { color = "#d32f2f"; word = "「熱」"; baseText = "周辺演出に 「熱」 の文字が出現！！"; } 
-  else if (seed < 0.08) { color = "#9c27b0"; word = "「神」"; baseText = "神々しい輝きと共に 「神」 の文字が出現！！！"; } 
-  else if (seed < 0.18) { color = "#3f51b5"; word = "「チャンス」"; baseText = "液晶中央に 「チャンス」 の文字が出現！"; } 
-  else {
-   let mSeed = Math.random();
-   if (mSeed < 0.35) { color = "#2196f3"; word = "「怪しい」"; baseText = "ザワザワ… 「怪しい」 の文字が頻繁に横切る。"; }
-   else if (mSeed < 0.60) { color = "#2196f3"; baseText = "青文字ウィンドウが出現。ざわざわ…"; }
-   else {
-    if (currentModeIndex === 3) { color = "#9c27b0"; baseText = "オーラが紫に染まる…！"; }
-    else if (currentModeIndex === 2) { color = "#fbc02d"; baseText = "黄ナビが発生。ざわざわ…"; }
-    else { color = "#4caf50"; baseText = "緑エフェクトが発生。ざわざわ…"; }
-   }
+/* --- ガチ信頼度セリフ生成関数 --- */
+function getSerifuEffect(isHit, currentModeIndex, isHikimodoshiMode = false) {
+ let text = "「……レバーを叩くんだ！」";
+ if (isHikimodoshiMode) {
+  // 引き戻しゾーン中のセリフ振り分け
+  let r = Math.random();
+  if (isHit) {
+   if (r < 0.3) text = "「何かが起きる予感……！」";
+   else if (r < 0.7) text = "「諦めるのはまだ早いぞ！」";
+   else text = "「神の領域へ……！？」";
+  } else {
+   if (r < 0.6) text = "「……静かだな。」";
+   else if (r < 0.9) text = "「気配を感じる……。」";
+   else text = "「何かが起きる予感……！」（ガセ）";
   }
- } else {
-  if (seed < 0.005) { color = "#d32f2f"; baseText = "激アツの赤セリフが発生！！"; } 
-  else if (seed < 0.010) { color = "#d32f2f"; word = "「熱」"; baseText = "周辺演出に 「熱」 の文字が出現！！"; } 
-  else if (seed < 0.05) { color = "#3f51b5"; word = "「チャンス」"; baseText = "液晶中央に 「チャンス」 の文字が出現！"; } 
-  else {
-   let mSeed = Math.random();
-   if (mSeed < 0.45) { color = "#2196f3"; word = "「怪しい」"; baseText = "ザワザワ… 「怪しい」 の文字が頻繁に横切る。"; }
-   else if (mSeed < 0.75) { color = "#2196f3"; baseText = "青文字ウィンドウが出現。ざわざわ…"; }
-   else {
-    if (currentModeIndex === 3) { color = "#9c27b0"; baseText = "オーラが紫に染まる…！"; }
-    else if (currentModeIndex === 2) { color = "#fbc02d"; baseText = "黄ナビが発生.ざわざわ…"; }
-    else { color = "#4caf50"; baseText = "緑エフェクトが発生。ざわざわ…"; }
-   }
-  }
+  return text;
  }
- return { text: baseText, color: color };
+
+ // 通常時の前兆セリフ
+ let seed = Math.random();
+ if (isHit) {
+  if (seed < 0.15) text = "「あっつい！あっつい！」"; 
+  else if (seed < 0.30) text = "「このあとチャンスだぞ！」"; 
+  else if (seed < 0.40) text = "「神の領域へ……！？」"; 
+  else if (seed < 0.65) text = "「何かが起きる予感……！」"; 
+  else text = "「気配を感じる……。」";
+ } else {
+  if (seed < 0.01) text = "「あっつい！あっつい！」（ガセガッカリ）"; 
+  else if (seed < 0.05) text = "「このあとチャンスだぞ！」（ガセ）"; 
+  else if (seed < 0.40) text = "「何かが起きる予感……！」（ガセ）"; 
+  else if (seed < 0.70) text = "「気配を感じる……。」";
+  else text = "「……静かだな。」";
+ }
+ return text;
 }
 
-/* --- 抽選コアロジック --- */
+/* --- スロット実行メイン --- */
 function playSlot() {
  if (myMedal < 3) {
   document.getElementById("msgDisplay").innerHTML = "<span style='color:red;'>❌ メダルが無いよ！<br>貸し出しを押してね</span>";
@@ -590,34 +590,52 @@ function playSlot() {
 
  let displayMsg = `<span style="font-size:20px; color:#333;">${roleName} [${medalDiffText}]</span>`;
 
- /* ================= 通常モード ================= */
- if (currentMode === "NORMAL") {
-  normalGames++;
-
-  // --- 【新設】ブラックアウト引き戻しチェック ---
-  if (hasHikimodoshi && normalGames === hikimodoshiGame) {
+ /* ================= 【最優先】引き戻しゾーンのガチ抽選制御 ================= */
+ if (hasHikimodoshi) {
+  hikimodoshiGameCount++;
+  
+  let isHitThisGame = false;
+  
+  if (hikimodoshiGameCount <= 31) {
+   // 1〜31G目までは毎ゲーム 1/32 のガチ抽選
+    if (Math.random() < 1/32) { isHitThisGame = true; }
+  } else {
+   // 32G目まで一度も引けなかった場合は100%ここで引き戻し告知が発動する
+   isHitThisGame = true;
+  }
+  
+  if (isHitThisGame) {
    hasHikimodoshi = false;
+   hikimodoshiGameCount = 0;
    soundBlackout();
    
-   // 画面を完全にブラックアウトさせる演出スタイルを適用
    document.getElementById("slotReelsContainer").classList.add("blackout-reels");
    document.getElementById("msgDisplay").classList.add("blackout-msg");
    
    currentMode = "BIG";
    bigRemaining = 30;
    totalBigGames = 0;
-   bigBattleGames = 0;
+   bigBattleGames = 0; // 引き戻し時は0Gスタート
    battleState = "NONE";
-   bonusStartMedal = myMedal + 3; // 現状維持スタート
-   normalGames = 0; // 現在0Gスタート
+   bonusStartMedal = myMedal + 3; 
+   normalGames = 0; 
    
-   displayMsg = `<span style="font-size:24px; font-weight:bold; color:#ff0000;">⚠️フリーズ：BLACKOUT⚠️</span><br><span style="color:#fff; font-size:18px;">通常画面から突然の強制シャットダウン！<br>🔴裏引き戻しBIG BONUSに突入！ (0G連)</span>`;
-   addSlotHistory(`通常時 ${hikimodoshiGame}G目 → 突然のブラックアウト引き戻しBIG確定！`);
+   displayMsg = `<span style="font-size:24px; font-weight:bold; color:#ff0000;">⚠️フリーズ：BLACKOUT⚠️</span><br><span style="color:#fff; font-size:18px;">プスン……液晶消灯……<br>🔴裏引き戻しBIG BONUS復帰確定！ (0Gスタート)</span>`;
+   addSlotHistory(`引き戻しゾーン中 → ガチ抽選突破！漆黒フリーズからBIG復帰！`);
    
    updateSlotDisplay();
    document.getElementById("msgDisplay").innerHTML = displayMsg;
    return; 
+  } else {
+   // 引き戻し非当選の当該ゲームセリフ演出
+   let serifu = getSerifuEffect(false, internalMode, true);
+   displayMsg += `<br><span style="color:#9c27b0; font-weight:bold;">${serifu}</span>`;
+   if (hikimodoshiGameCount >= 32) { hasHikimodoshi = false; hikimodoshiGameCount = 0; } // セーフティ
   }
+
+ /* ================= 通常モード ================= */
+ } else if (currentMode === "NORMAL") {
+  normalGames++;
   
   if (roleName === "スイカ" && Math.random() < 0.33) { if (internalMode < 3) { internalMode++; } } 
   else if (roleName === "チェリー" && Math.random() < 0.66) { if (internalMode < 3) { internalMode++; } } 
@@ -685,11 +703,12 @@ function playSlot() {
      else if (normalGames >= 200 && isLoopMode) { isLoopMode = true; } 
      else if (normalGames <= 199) { isLoopMode = false; }
     } else {
-     displayMsg += `<br><span style="color:gray;">演出が静まり返った…（ガセ前兆終了）</span>`;
+     displayMsg += `<br><span style="color:gray;">通常画面へ戻った（セリフ前兆終了）</span>`;
     }
    } else {
-    let effect = generateZenchoEffect(isZenchoHit, internalMode);
-    displayMsg += `<br><span style="color:${effect.color}; font-weight:bold;">${effect.text}</span>`;
+    // 信頼度対応のガチ前兆演出セリフを生成
+    let serifu = getSerifuEffect(isZenchoHit, internalMode, false);
+    displayMsg += `<br><span style="color:#2196f3; font-weight:bold;">${serifu}</span>`;
    }
   }
 
@@ -699,7 +718,6 @@ function playSlot() {
   let czSuccess = false;
   let czKiki = "";
   
-  // 新・CZ突破期待度割り振り
   let czRoll = Math.random();
   if (roleName === "チェリー") {
    czSuccess = true; 
@@ -709,7 +727,6 @@ function playSlot() {
   } else if (roleName === "リプレイ") {
    if (czRoll < 0.40) { czSuccess = true; czKiki = "リプレイ(40%)"; }
   } else {
-   // ハズレ目、3枚ベル、8枚ベルの5%抽選
    if (czRoll < 0.05) { czSuccess = true; czKiki = `${roleName}(5%の奇跡)`; }
   }
   
@@ -763,8 +780,8 @@ function playSlot() {
    bigRemaining--;
    bigBattleGames++;
 
-   let isBattleHit = false;
-   let battleKiki = "";
+   let isBattleHit = false; 
+   let isRare = (roleName === "スイカ" || roleName === "チェリー");
 
    if (roleName === "スイカ") {
     let r = Math.random();
@@ -779,10 +796,8 @@ function playSlot() {
      displayMsg += `<br><span style="color:#4caf50; font-weight:bold; font-size:18px;">🍉スイカ直乗せ +${uwanose}G！</span>`;
      addSlotHistory(`BB中 スイカから直乗せ +${uwanose}G`);
      soundUwanose告知();
-    } else {
-     displayMsg += `<br><span style="color:gray;">🍉スイカ（上乗せなし）</span>`;
     }
-    if (Math.random() < 0.03) { isBattleHit = true; battleKiki = "スイカ"; }
+    if (Math.random() < 0.03) { isBattleHit = true; }
 
    } else if (roleName === "チェリー") {
     let r = Math.random();
@@ -797,34 +812,37 @@ function playSlot() {
     addSlotHistory(`BB中 チェリーから直乗せ +${uwanose}G`);
     soundUwanose告知();
 
-    if (Math.random() < 0.40) { isBattleHit = true; battleKiki = "チェリー"; }
+    if (Math.random() < 0.40) { isBattleHit = true; }
    }
 
-   if (isBattleHit) {
-    battleState = "PRE";
-    bZenchoRemaining = 3; 
-    isBattleWin = false;
-    displayMsg += `<br><span style="color:#9c27b0; font-weight:bold;">🎬 レア役(${battleKiki})からバトル前兆(3G)へ突入！</span>`;
-   } 
-   else if ([30, 60, 90, 120, 150].includes(bigBattleGames)) {
+   let is30GTrigger = [30, 60, 90, 120, 150].includes(bigBattleGames);
+   if (is30GTrigger && !isBattleHit) {
     let bRoll = Math.random();
     let idx = [30, 60, 90, 120, 150].indexOf(bigBattleGames);
     let hitProb = [0.10, 0.33, 0.50, 0.66, 1.00][idx];
+    if (bRoll < hitProb) { isBattleHit = true; }
+   }
 
-    if (bRoll < hitProb) {
-     battleState = "PRE";
-     bZenchoRemaining = 3; 
-     isBattleWin = false;
-     displayMsg += `<br><span style="color:#9c27b0; font-weight:bold;">🎬 ${bigBattleGames}G到達！バトル前兆(3G)へ突入！</span>`;
-    } else {
-     displayMsg += `<br><span style="color:gray;">（${bigBattleGames}G：作戦区域への発展なし）</span>`;
-     if (bigRemaining <= 0) {
-      currentMode = "RESULT";
-      lastCalculatedGain = myMedal - bonusStartMedal;
-      displayMsg += `<br><span style="color:#795548; font-size:20px;">📊 リザルト画面 📊<br>獲得枚数：${lastCalculatedGain}枚</span>`;
-      addSlotHistory(`${totalBigGames}G → BIG終了（獲得:${lastCalculatedGain}枚）`);
+   let triggerPre = false;
+   let actualHit = false;
+
+   if (isBattleHit) {
+    actualHit = true;
+    triggerPre = true; 
+   } else {
+    if ((isRare || is30GTrigger) && bigRemaining >= 3) {
+     if (Math.random() < 0.50) {
+      triggerPre = true; 
+      actualHit = false;
      }
     }
+   }
+
+   if (triggerPre) {
+    battleState = "PRE";
+    bZenchoRemaining = 3; 
+    isBZenchoHitActual = actualHit; 
+    isBattleWin = false;
    } else {
     if (bigRemaining <= 0) {
      currentMode = "RESULT";
@@ -836,20 +854,34 @@ function playSlot() {
 
   } else if (battleState === "PRE") {
    bZenchoRemaining--;
-   displayMsg += `<br><span style="color:#9c27b0;">前兆中…前方の液晶が激しくざわつく！</span>`;
+   
+   // セリフ前兆演出
+   let bSerifu = "「何かが近づいてくる気配がする……」";
+   if (bZenchoRemaining === 1) bSerifu = "「よし、この先が敵の根城だ！」";
+   displayMsg += `<br><span style="color:#9c27b0; font-weight:bold;">${bSerifu}</span>`;
 
    if (bZenchoRemaining === 0) {
-    battleState = "BATTLE";
-    battleCount = 0; 
-    
-    // 発展先のガチ抽選 (ゴーレム:50% / スライム:30% / ミミック:20%)
-    let eRoll = Math.random();
-    if (eRoll < 0.50) { enemyType = "ゴーレム"; }
-    else if (eRoll < 0.80) { enemyType = "スライム"; }
-    else { enemyType = "ミミック"; }
-    
-    displayMsg += `<br><span style="color:#ff9800; font-weight:bold;">⚔️ 敵出現！ vs ${enemyType} ⚔️</span>`;
-    soundBattleStart();
+    if (isBZenchoHitActual) {
+     battleState = "BATTLE";
+     battleCount = 0; 
+     
+     let eRoll = Math.random();
+     if (eRoll < 0.50) { enemyType = "ゴーレム"; }
+     else if (eRoll < 0.80) { enemyType = "スライム"; }
+     else { enemyType = "ミミック"; }
+     
+     displayMsg += `<br><span style="color:#ff9800; font-weight:bold;">⚔️ 敵出現！ vs ${enemyType} ⚔️</span>`;
+     soundBattleStart();
+    } else {
+     battleState = "NONE";
+     displayMsg += `<br><span style="color:gray;">「気のせいだったか……」通常の空間に戻る</span>`;
+     if (bigRemaining <= 0) {
+      currentMode = "RESULT";
+      lastCalculatedGain = myMedal - bonusStartMedal;
+      displayMsg += `<br><span style="color:#795548; font-size:20px;">📊 リザルト画面 📊<br>獲得枚数：${lastCalculatedGain}枚</span>`;
+      addSlotHistory(`${totalBigGames}G → ガセ前兆スルーによりBB終了`);
+     }
+    }
    }
 
   } else if (battleState === "BATTLE") {
@@ -876,12 +908,18 @@ function playSlot() {
    }
 
    if (Math.random() < winProb) { isBattleWin = true; }
-   displayMsg += `<br><span style="color:#ff9800;">【バトル ${battleCount}/3 G目】${enemyType}に猛攻を仕掛ける！</span>`;
+   
+   // バトルのガチセリフ演出
+   let fightSerifu = "「くらえ！全力の一撃！！」";
+   if (battleCount === 2) fightSerifu = "「相手の動きが見切れてきたぞ！」";
+   if (battleCount === 3) fightSerifu = isBattleWin ? "「これで終わりだーー！」" : "「くっ、避けきれない……！」";
+   
+   displayMsg += `<br><span style="color:#ff9800; font-weight:bold;">【${enemyType}戦 ${battleCount}/3G】${fightSerifu}</span>`;
    
    if (battleCount === 3) {
     if (isBattleWin) {
      battleState = "REWARD"; 
-     displayMsg += `<br><span style="color:#00e676; font-weight:bold; font-size:20px;">🎉 BATTLE WIN!! 敵を完全撃破！</span>`;
+     displayMsg += `<br><span style="color:#00e676; font-weight:bold; font-size:20px;">🎉 BATTLE WIN!! 敵の完全撃破に成功！</span>`;
      soundUwanose告知();
     } else {
      battleState = "NONE";
@@ -912,7 +950,7 @@ function playSlot() {
    }
 
    bigRemaining += uwanose;
-   displayMsg += `<br><span style="color:#00e676; font-weight:bold; font-size:22px;">👑 報酬告知 👑：+${uwanose}G 上乗せ！</span>`;
+   displayMsg += `<br><span style="color:#00e676; font-weight:bold; font-size:22px;">👑 報酬告知 👑：+${uwanose}G 魂の上乗せ！</span>`;
    addSlotHistory(`BB中 バトル勝利(${enemyType}) → +${uwanose}G`);
    soundUwanose告知();
 
@@ -952,6 +990,8 @@ function playSlot() {
    addSlotHistory(`リザルト → 幻影昇格BIG当選（G数引き継ぎ！）`);
    soundUwanose告知();
    revived = true;
+   regToBigUpgraded = false; 
+
   } else if (roleName === "スイカ" || roleName === "チェリー") {
    currentMode = "BIG";
    bigRemaining = 30;
@@ -980,11 +1020,11 @@ function playSlot() {
    internalMode = 1; 
    soundBonusEnd();
    
-   // --- 【新設】15%の確率で裏引き戻しフラグをセット ---
+   // リざると画面を抜けるタイミングで、15%の確率で「32G間の裏引き戻しフラグ」をセット！
    if (Math.random() < 0.15) {
     hasHikimodoshi = true;
-    hikimodoshiGame = Math.floor(Math.random() * 32) + 1; // 1~32Gのランダム
-    addSlotHistory(`（裏モード：内部引き戻し当選！ ${hikimodoshiGame}G目に発動予定）`);
+    hikimodoshiGameCount = 0; // カウンターをゼロにリセット
+    addSlotHistory(`（内部状態：15%の引き戻しモードに当選！最大32G間の叩きどころ）`);
    } else {
     hasHikimodoshi = false;
    }

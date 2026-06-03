@@ -39,10 +39,22 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  color: #ffca28;
  margin-top: 5px;
 }
+/* リセットボタン用の目立つスタイル */
+.btn-reset {
+ background-color: #757575;
+ color: #fff;
+ margin-top: 15px;
+ font-size: 0.9rem;
+ padding: 8px;
+}
+.btn-reset:hover {
+ background-color: #616161;
+}
 </style>
 </head>
 <body>
 
+<!-- TOPエリア -->
 <div id="topArea">
  <h2 class="appTitle">最強ツール</h2>
  <div class="box" style="text-align: center; margin-bottom: 20px;">
@@ -56,6 +68,7 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showLogin()" style="background-color: #4caf50;">パチスロツールを開く</button>
 </div>
 
+<!-- ログインエリア -->
 <div id="loginArea" class="hidden">
  <h2 class="appTitle">暗証番号入力</h2>
  <input id="password" type="password" placeholder="暗証番号">
@@ -63,6 +76,7 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showTop()" style="background-color: #555;">戻る</button>
 </div>
 
+<!-- メニューエリア -->
 <div id="menuArea" class="hidden">
  <h2 class="appTitle">メニュー</h2>
  <div class="nav-grid">
@@ -73,6 +87,7 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  </div>
 </div>
 
+<!-- 攻略情報エリア -->
 <div id="kouryakuArea" class="hidden">
  <h2>攻略</h2>
  <div class="grid3">
@@ -89,6 +104,7 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
 
+<!-- 各攻略個別ページ -->
 <div id="hokutoTensei2Area" class="hidden"><h2>北斗転生2</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 <div id="tekken6Area" class="hidden"><h2>鉄拳6</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 <div id="hokutoArea" class="hidden"><h2>北斗の拳</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
@@ -96,49 +112,56 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 <div id="magirecoArea" class="hidden"><h2>マギアレコード</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 <div id="unset1Area" class="hidden"><h2>未設定</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 
+<!-- 台データ作成エリア -->
 <div id="tenseiArea" class="hidden">
  <h2>データ作成</h2>
- <select id="machine" onchange="updateAnimalOptions(); updateInputFields(); updateTenseiPreview();">
+ <select id="machine" onchange="updateAnimalOptions(); updateInputFields(); updateTenseiPreview(); saveAllInputs();">
   <option value="北斗転生" selected>北斗転生</option>
   <option value="鉄拳">鉄拳</option>
   <option value="北斗">北斗</option>
   <option value="ミリオンゴッド">ミリオンゴッド</option>
   <option value="マギアレコード">マギアレコード</option>
  </select>
- <select id="store" onchange="updateTenseiPreview()">
+ <select id="store" onchange="updateTenseiPreview(); saveAllInputs();">
   <option>メガサイバー新鎌ヶ谷</option>
   <option>ピア柏</option>
   <option>楽園柏</option>
  </select>
- <input id="machineNo" type="number" placeholder="何台目か" oninput="updateTenseiPreview()">
- <input id="daiBan" type="number" placeholder="台番" oninput="updateTenseiPreview()">
- <select id="animal" onchange="updateInputFields(); updateTenseiPreview();"></select>
+ <input id="machineNo" type="number" placeholder="何台目か" oninput="updateTenseiPreview(); saveAllInputs();">
+ <input id="daiBan" type="number" placeholder="台番" oninput="updateTenseiPreview(); saveAllInputs();">
+ <select id="animal" onchange="updateInputFields(); updateTenseiPreview(); saveAllInputs();"></select>
  
- <input id="valueExpect" type="number" placeholder="等価期待値" oninput="updateTenseiPreview()" class="hidden">
+ <input id="valueExpect" type="number" placeholder="等価期待値" oninput="updateTenseiPreview(); saveAllInputs();" class="hidden">
  
- <input id="startSpin" type="number" placeholder="回転数" oninput="updateTenseiPreview()">
- <input id="totalSpin" type="number" placeholder="総回転数" oninput="updateTenseiPreview()">
- <input id="sitDownTotalSpin" type="number" placeholder="着席時総回転数" oninput="updateTenseiPreview()">
- <input id="remainBall" type="number" placeholder="残玉" oninput="updateTenseiPreview()">
- <input id="saveBall" type="number" placeholder="貯玉" oninput="updateTenseiPreview()">
- <input id="cashBall" type="number" placeholder="現金" oninput="updateTenseiPreview()">
- <input id="yameGame" type="number" placeholder="やめ" oninput="updateTenseiPreview()">
- <select id="rate" onchange="updateTenseiPreview()">
+ <input id="startSpin" type="number" placeholder="回転数" oninput="updateTenseiPreview(); saveAllInputs();">
+ <input id="totalSpin" type="number" placeholder="総回転数" oninput="updateTenseiPreview(); saveAllInputs();">
+ <input id="sitDownTotalSpin" type="number" placeholder="着席時総回転数" oninput="updateTenseiPreview(); saveAllInputs();">
+ <input id="remainBall" type="number" placeholder="残玉" oninput="updateTenseiPreview(); saveAllInputs();">
+ <input id="saveBall" type="number" placeholder="貯玉" oninput="updateTenseiPreview(); saveAllInputs();">
+ <input id="cashBall" type="number" placeholder="現金" oninput="updateTenseiPreview(); saveAllInputs();">
+ <input id="yameGame" type="number" placeholder="やめ" oninput="updateTenseiPreview(); saveAllInputs();">
+ <select id="rate" onchange="updateTenseiPreview(); saveAllInputs();">
   <option>46</option>
   <option>50</option>
  </select>
  
  <div class="box">
   <div class="row" id="hitInputRow">
-   </div>
+   <!-- 動的に中身が切り替わるエリア -->
+  </div>
   <button onclick="addEntry()" style="margin-top:10px; background-color:#ff9800;">履歴追加</button>
  </div>
  <div id="historyList" class="box"></div>
  <button onclick="copyTensei(event)" style="background-color:#4caf50;">データをコピーする</button>
  <pre id="tenseiOutput" class="box"></pre>
+ 
+ <!-- 新設：入力内容を全消去するリセットボタン -->
+ <button onclick="resetAllTenseiFields()" class="btn-reset">⚠️ 入力内容と履歴をすべて消去（リセット）</button>
+ <hr style="margin-top: 15px; margin-bottom: 15px; border-color: #444;">
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
 
+<!-- 精算エリア -->
 <div id="seisanArea" class="hidden">
  <h2>精算</h2>
  <input id="seed" type="number" placeholder="種銭">
@@ -166,8 +189,13 @@ window.onload=()=>{
  loadSyncData();
  
  if(localStorage.getItem("loggedIn")==="true") showMenu(); else showTop();
+ 
+ // まずセレクトボックスの初期選択肢を生成
  updateAnimalOptions();
  updateInputFields();
+ 
+ // 保存されたバックアップがあれば復元
+ loadSavedInputs();
 };
 
 function loadSyncData() {
@@ -181,6 +209,79 @@ function loadSyncData() {
   document.getElementById("syncNormalG").innerText = `${syncData.normalGames} G`;
   document.getElementById("syncBBG").innerText = `${syncData.totalBigGames} G`;
  }
+}
+
+// 🟩 入力値をローカルストレージに自動保存する処理
+function saveAllInputs() {
+ const fields = [
+  "machine", "store", "machineNo", "daiBan", "animal", 
+  "valueExpect", "startSpin", "totalSpin", "sitDownTotalSpin", 
+  "remainBall", "saveBall", "cashBall", "yameGame", "rate"
+ ];
+ const backupData = {};
+ fields.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) backupData[id] = el.value;
+ });
+ backupData["tenseiHistory"] = tenseiHistory;
+ 
+ localStorage.setItem('tensei_auto_backup', JSON.stringify(backupData));
+}
+
+// 🟩 ページ読み込み時に自動保存データがあれば復元する処理
+function loadSavedInputs() {
+ const savedDataRaw = localStorage.getItem('tensei_auto_backup');
+ if (!savedDataRaw) {
+  updateTenseiPreview();
+  return;
+ }
+ 
+ const backupData = JSON.parse(savedDataRaw);
+ 
+ // 機種と店舗を先に復元
+ if (backupData["machine"]) document.getElementById("machine").value = backupData["machine"];
+ updateAnimalOptions(); // 機種に応じてアニマル選択肢を再生成
+ 
+ if (backupData["animal"]) document.getElementById("animal").value = backupData["animal"];
+ updateInputFields(); // 条件に応じた入力欄の切り替え
+
+ // その他の入力数値を一気に復元
+ const fields = [
+  "store", "machineNo", "daiBan", "valueExpect", "startSpin", 
+  "totalSpin", "sitDownTotalSpin", "remainBall", "saveBall", 
+  "cashBall", "yameGame", "rate"
+ ];
+ fields.forEach(id => {
+  if (backupData[id] !== undefined && document.getElementById(id)) {
+   document.getElementById(id).value = backupData[id];
+  }
+ });
+ 
+ // 大当たり履歴の配列を復元
+ if (backupData["tenseiHistory"]) {
+  tenseiHistory = backupData["tenseiHistory"];
+ }
+ 
+ updateTenseiPreview();
+}
+
+// 🟩 リセットボタン：すべての入力を消去してバックアップも消す
+function resetAllTenseiFields() {
+ if (!confirm("現在入力されている内容と大当たり履歴をすべて消去してもよろしいですか？")) return;
+ 
+ const fields = [
+  "machineNo", "daiBan", "valueExpect", "startSpin", "totalSpin", 
+  "sitDownTotalSpin", "remainBall", "saveBall", "cashBall", "yameGame"
+ ];
+ fields.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.value = "";
+ });
+ 
+ tenseiHistory = [];
+ localStorage.removeItem('tensei_auto_backup'); // バックアップデータ削除
+ 
+ updateTenseiPreview();
 }
 
 function hideAll(){
@@ -224,7 +325,7 @@ function updateAnimalOptions(){
  else if(machine==='鉄拳') options=['リセ','AT間天井狙い'];
  else if(machine==='北斗') options=['リセ','差枚'];
  else if(machine==='ミリオンゴッド') options=['AT間連荘狙い','前回VVV揃い後','前回Z-ZONE後','前回赤7揃い後','前回天井到達後','前回GOD揃い後','前回5連以上後','前々回赤7揃い後','前々回Z-ZONE後','前々回VVV揃い後'];
- else if(machine==='マギアレコード') options=['AT間天井狙い']; // マギレコはAT間天井狙いのみ
+ else if(machine==='マギアレコード') options=['AT間天井狙い'];
  
  animalEl.innerHTML='';
  options.forEach(o=>{
@@ -232,29 +333,24 @@ function updateAnimalOptions(){
   opt.value=o; opt.textContent=o; animalEl.appendChild(opt);
  });
  
- // マギレコや選択肢が1つのみの場合はセレクトボックス自体を隠す・見せるの調整
  if(options.length <= 1) animalEl.classList.add("hidden");
  else animalEl.classList.remove("hidden");
 }
 
-// 各機種・条件に応じた入力項目の切り替え処理
 function updateInputFields() {
  const machine = document.getElementById('machine').value;
  const animal = document.getElementById('animal').value;
  const expectInput = document.getElementById('valueExpect');
  const row = document.getElementById('hitInputRow');
  
- // 1. 等価期待値入力欄の表示条件判定
  if ((machine === '鉄拳' && animal === 'AT間天井狙い') || 
      (machine === 'ミリオンゴッド' && animal === 'AT間連荘狙い') || 
      machine === 'マギアレコード') {
   expectInput.classList.remove("hidden");
  } else {
   expectInput.classList.add("hidden");
-  expectInput.value = ""; // 非表示時はクリア
  }
 
- // 2. 大当たり入力行（ゲーム数/フラグ/獲得玉）の切り替え
  if (machine === '鉄拳') {
   row.innerHTML = `
    <input id="hitGame" type="number" placeholder="当選ゲーム数">
@@ -275,7 +371,6 @@ function updateInputFields() {
    </select>
    <input id="gainBall" type="number" placeholder="獲得玉">`;
  } else {
-  // 通常（北斗、ゴッド等）はゲーム数/連荘数/獲得玉
   row.innerHTML = `
    <input id="hitGame" type="number" placeholder="当選ゲーム数">
    <input id="chainCount" type="number" placeholder="連荘数">
@@ -306,9 +401,14 @@ function addEntry(){
  tenseiHistory.unshift({game, chain, gain, bType});
  hG.value=""; if(cC) cC.value=""; gB.value="";
  updateTenseiPreview();
+ saveAllInputs(); // 履歴追加時も自動保存
 }
 
-function deleteEntry(i){ tenseiHistory.splice(i,1); updateTenseiPreview(); }
+function deleteEntry(i){ 
+ tenseiHistory.splice(i,1); 
+ updateTenseiPreview(); 
+ saveAllInputs(); // 履歴削除時も自動保存
+}
 
 function updateTenseiPreview(){
  const hList = document.getElementById("historyList");
@@ -332,7 +432,6 @@ function updateTenseiPreview(){
  const machineNoVal = getVal("machineNo");
  const expVal = getVal("valueExpect");
  
- // 機種番号・ヘッダー条件分岐
  let baseNo = 3818;
  if (machine === '北斗') baseNo = 3840;
  
@@ -369,7 +468,6 @@ function updateTenseiPreview(){
 
  const gainText = "獲得玉###" + [...tenseiHistory].reverse().map(x=>x.gain).join("#");
  
- // 大当たりフラグ出力ロジックの振り分け
  const hitText = tenseiHistory.map(x=>{
   if (machine === '鉄拳') {
    if (x.bType === '青7') return `${x.game}#1`;
@@ -383,10 +481,9 @@ function updateTenseiPreview(){
    if (x.bType === 'ラッシュ') return `${x.game}#3`;
   }
   if (machine === 'ミリオンゴッド') {
-   if (Number(x.chain) <= 1) return `${x.game}#1#2`; // 単発
-   return `${x.game}#1#2###${x.chain}`; // 2連以上
+   if (Number(x.chain) <= 1) return `${x.game}#1#2`;
+   return `${x.game}#1#2###${x.chain}`;
   }
-  // 通常（北斗など）
   if(x.chain===1) return `${x.game}#1`;
   return `${x.game}#1#2###${x.chain}`;
  }).join("\n");
@@ -402,7 +499,6 @@ function updateTenseiPreview(){
  const storeV = document.getElementById("store").value;
  const daiBanV = getVal("daiBan");
 
- // 出力テキストの組み立て（不要な改行位置の調整）
  let condSection = expect !== "" ? expect : machineRate;
 
  tOutput.textContent=`機種番号${baseNo}

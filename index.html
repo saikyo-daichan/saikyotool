@@ -14,7 +14,7 @@ button:hover{background-color:#303f9f;}
 .box{border:1px solid #444;border-radius:8px;padding:10px;margin-top:10px;background:#2d2d2d;}
 pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#00e676;}
 .row{display:flex;gap:8px}
-.row input{margin-bottom:0}
+.row input, .row select{margin-bottom:0}
 .smallbtn{width:auto;padding:4px 8px;margin-left:8px;background-color:#e53935;}
 .smallbtn:hover{background-color:#c62828;}
 .grid3{
@@ -43,7 +43,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 </head>
 <body>
 
-<!-- TOPエリア -->
 <div id="topArea">
  <h2 class="appTitle">最強ツール</h2>
  <div class="box" style="text-align: center; margin-bottom: 20px;">
@@ -57,7 +56,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showLogin()" style="background-color: #4caf50;">パチスロツールを開く</button>
 </div>
 
-<!-- ログインエリア -->
 <div id="loginArea" class="hidden">
  <h2 class="appTitle">暗証番号入力</h2>
  <input id="password" type="password" placeholder="暗証番号">
@@ -65,7 +63,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showTop()" style="background-color: #555;">戻る</button>
 </div>
 
-<!-- メニューエリア -->
 <div id="menuArea" class="hidden">
  <h2 class="appTitle">メニュー</h2>
  <div class="nav-grid">
@@ -76,7 +73,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  </div>
 </div>
 
-<!-- 攻略情報エリア -->
 <div id="kouryakuArea" class="hidden">
  <h2>攻略</h2>
  <div class="grid3">
@@ -93,7 +89,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
 
-<!-- 各攻略個別ページ -->
 <div id="hokutoTensei2Area" class="hidden"><h2>北斗転生2</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 <div id="tekken6Area" class="hidden"><h2>鉄拳6</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 <div id="hokutoArea" class="hidden"><h2>北斗の拳</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
@@ -101,14 +96,14 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 <div id="magirecoArea" class="hidden"><h2>マギアレコード</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 <div id="unset1Area" class="hidden"><h2>未設定</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 
-<!-- 台データ作成エリア -->
 <div id="tenseiArea" class="hidden">
  <h2>データ作成</h2>
- <select id="machine" onchange="updateAnimalOptions();updateTenseiPreview()">
+ <select id="machine" onchange="updateAnimalOptions(); updateInputFields(); updateTenseiPreview();">
   <option value="北斗転生" selected>北斗転生</option>
   <option value="鉄拳">鉄拳</option>
   <option value="北斗">北斗</option>
   <option value="ミリオンゴッド">ミリオンゴッド</option>
+  <option value="マギアレコード">マギアレコード</option>
  </select>
  <select id="store" onchange="updateTenseiPreview()">
   <option>メガサイバー新鎌ヶ谷</option>
@@ -117,9 +112,13 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  </select>
  <input id="machineNo" type="number" placeholder="何台目か" oninput="updateTenseiPreview()">
  <input id="daiBan" type="number" placeholder="台番" oninput="updateTenseiPreview()">
- <select id="animal" onchange="updateTenseiPreview()"></select>
+ <select id="animal" onchange="updateInputFields(); updateTenseiPreview();"></select>
+ 
+ <input id="valueExpect" type="number" placeholder="等価期待値" oninput="updateTenseiPreview()" class="hidden">
+ 
  <input id="startSpin" type="number" placeholder="回転数" oninput="updateTenseiPreview()">
  <input id="totalSpin" type="number" placeholder="総回転数" oninput="updateTenseiPreview()">
+ <input id="sitDownTotalSpin" type="number" placeholder="着席時総回転数" oninput="updateTenseiPreview()">
  <input id="remainBall" type="number" placeholder="残玉" oninput="updateTenseiPreview()">
  <input id="saveBall" type="number" placeholder="貯玉" oninput="updateTenseiPreview()">
  <input id="cashBall" type="number" placeholder="現金" oninput="updateTenseiPreview()">
@@ -130,11 +129,8 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  </select>
  
  <div class="box">
-  <div class="row">
-   <input id="hitGame" type="number" placeholder="当選ゲーム数">
-   <input id="chainCount" type="number" placeholder="連荘数">
-   <input id="gainBall" type="number" placeholder="獲得玉">
-  </div>
+  <div class="row" id="hitInputRow">
+   </div>
   <button onclick="addEntry()" style="margin-top:10px; background-color:#ff9800;">履歴追加</button>
  </div>
  <div id="historyList" class="box"></div>
@@ -143,7 +139,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
 
-<!-- 精算エリア -->
 <div id="seisanArea" class="hidden">
  <h2>精算</h2>
  <input id="seed" type="number" placeholder="種銭">
@@ -168,11 +163,11 @@ window.onload=()=>{
  document.title=APP_NAME;
  document.querySelectorAll(".appTitle").forEach(x=>x.innerText=APP_NAME);
  
- // スロット側（slot.html）の遊技データの同期読み込み
  loadSyncData();
  
  if(localStorage.getItem("loggedIn")==="true") showMenu(); else showTop();
  updateAnimalOptions();
+ updateInputFields();
 };
 
 function loadSyncData() {
@@ -224,26 +219,92 @@ function updateAnimalOptions(){
  if(!machineEl || !animalEl) return;
  const machine = machineEl.value;
  let options=[];
+ 
  if(machine==='北斗転生') options=['イノシシ','ウリ坊'];
  else if(machine==='鉄拳') options=['リセ','AT間天井狙い'];
  else if(machine==='北斗') options=['リセ','差枚'];
- else if(machine==='ミリオンゴッド') options=['AT間連荘狙い','前回VVV揃い後','前回Z-ZONE後','前回赤7揃い後','前回天井到達後','前回GOD揃い後'];
+ else if(machine==='ミリオンゴッド') options=['AT間連荘狙い','前回VVV揃い後','前回Z-ZONE後','前回赤7揃い後','前回天井到達後','前回GOD揃い後','前回5連以上後','前々回赤7揃い後','前々回Z-ZONE後','前々回VVV揃い後'];
+ else if(machine==='マギアレコード') options=['AT間天井狙い']; // マギレコはAT間天井狙いのみ
+ 
  animalEl.innerHTML='';
  options.forEach(o=>{
   const opt=document.createElement('option');
   opt.value=o; opt.textContent=o; animalEl.appendChild(opt);
  });
+ 
+ // マギレコや選択肢が1つのみの場合はセレクトボックス自体を隠す・見せるの調整
+ if(options.length <= 1) animalEl.classList.add("hidden");
+ else animalEl.classList.remove("hidden");
+}
+
+// 各機種・条件に応じた入力項目の切り替え処理
+function updateInputFields() {
+ const machine = document.getElementById('machine').value;
+ const animal = document.getElementById('animal').value;
+ const expectInput = document.getElementById('valueExpect');
+ const row = document.getElementById('hitInputRow');
+ 
+ // 1. 等価期待値入力欄の表示条件判定
+ if ((machine === '鉄拳' && animal === 'AT間天井狙い') || 
+     (machine === 'ミリオンゴッド' && animal === 'AT間連荘狙い') || 
+     machine === 'マギアレコード') {
+  expectInput.classList.remove("hidden");
+ } else {
+  expectInput.classList.add("hidden");
+  expectInput.value = ""; // 非表示時はクリア
+ }
+
+ // 2. 大当たり入力行（ゲーム数/フラグ/獲得玉）の切り替え
+ if (machine === '鉄拳') {
+  row.innerHTML = `
+   <input id="hitGame" type="number" placeholder="当選ゲーム数">
+   <select id="bonusType">
+    <option value="青7">青7</option>
+    <option value="赤7">赤7</option>
+    <option value="直撃">直撃</option>
+   </select>
+   <input id="gainBall" type="number" placeholder="獲得玉">`;
+ } else if (machine === 'マギアレコード') {
+  row.innerHTML = `
+   <input id="hitGame" type="number" placeholder="当選ゲーム数">
+   <select id="bonusType">
+    <option value="みたまボーナス">みたまボーナス</option>
+    <option value="ビッグボーナス">ビッグボーナス</option>
+    <option value="ビッグ→ラッシュ">ビッグ→ラッシュ</option>
+    <option value="ラッシュ">ラッシュ</option>
+   </select>
+   <input id="gainBall" type="number" placeholder="獲得玉">`;
+ } else {
+  // 通常（北斗、ゴッド等）はゲーム数/連荘数/獲得玉
+  row.innerHTML = `
+   <input id="hitGame" type="number" placeholder="当選ゲーム数">
+   <input id="chainCount" type="number" placeholder="連荘数">
+   <input id="gainBall" type="number" placeholder="獲得玉">`;
+ }
 }
 
 function addEntry(){
  const hG = document.getElementById("hitGame");
- const cC = document.getElementById("chainCount");
  const gB = document.getElementById("gainBall");
- if(!hG || !cC || !gB) return;
- const game=Number(hG.value); const chain=Number(cC.value); const gain=Number(gB.value);
- if(!game||!chain)return;
- tenseiHistory.unshift({game,chain,gain});
- hG.value=""; cC.value=""; gB.value="";
+ const cC = document.getElementById("chainCount");
+ const bT = document.getElementById("bonusType");
+ 
+ if(!hG || !gB) return;
+ const game = Number(hG.value); 
+ const gain = Number(gB.value);
+ let chain = "";
+ let bType = "";
+ 
+ if (cC) {
+  chain = Number(cC.value);
+  if(!game || !chain) return;
+ } else if (bT) {
+  bType = bT.value;
+  if(!game) return;
+ }
+ 
+ tenseiHistory.unshift({game, chain, gain, bType});
+ hG.value=""; if(cC) cC.value=""; gB.value="";
  updateTenseiPreview();
 }
 
@@ -254,51 +315,102 @@ function updateTenseiPreview(){
  const tOutput = document.getElementById("tenseiOutput");
  if(!hList || !tOutput) return;
 
- hList.innerHTML=tenseiHistory.map((x,i)=>
- `<div>${x.game}G → ${x.chain}連 → ${x.gain}玉 <button class="smallbtn" onclick="deleteEntry(${i})">削除</button></div>`
- ).join("\n");
+ const machine = document.getElementById('machine').value;
+ const animal = document.getElementById('animal').value;
 
- const machine=document.getElementById('machine').value;
- const animal=document.getElementById('animal').value;
- const machineNoVal=document.getElementById('machineNo').value||"";
- const machineNoMap={"北斗転生":3818,"鉄拳":3818,"北斗":3840,"ミリオンゴッド":3818};
- const baseNo=machineNoMap[machine];
- let machineRate=""; let expect="";
+ hList.innerHTML=tenseiHistory.map((x,i)=>{
+  let midText = x.chain !== "" ? `${x.chain}連` : `${x.bType}`;
+  return `<div>${x.game}G → ${midText} → ${x.gain}玉 <button class="smallbtn" onclick="deleteEntry(${i})">削除</button></div>`;
+ }).join("\n");
 
- if(machine==='北斗転生') machineRate = animal==='ウリ坊' ? "機械割#99" : "機械割#106";
- if(machine==='鉄拳' && animal==='リセ') expect="等価期待値1479";
- if(machine==='ミリオンゴッド'){
-  if(animal==='前回VVV揃い後') machineRate="機械割#130";
-  else if(['前回Z-ZONE後','前回赤7揃い後','前回天井到達後'].includes(animal)) machineRate="機械割#102";
-  else if(animal==='前回GOD揃い後') machineRate="機械割#101";
-  else if(animal==='AT間連荘狙い') expect="等価期待値";
+ const getVal = (id) => {
+  const el = document.getElementById(id);
+  if (!el || el.value === "") return "";
+  return el.value;
+ };
+
+ const machineNoVal = getVal("machineNo");
+ const expVal = getVal("valueExpect");
+ 
+ // 機種番号・ヘッダー条件分岐
+ let baseNo = 3818;
+ if (machine === '北斗') baseNo = 3840;
+ 
+ let machineRate = ""; 
+ let expect = "";
+ let headerBBAT = "(1:RB 2:AT)";
+ let customTitle = `(${machine} ${animal}${machineNoVal})`;
+
+ if (machine === '北斗転生') {
+  machineRate = animal === 'ウリ坊' ? "機械割#99" : "機械割#106";
+ }
+ if (machine === '鉄拳') {
+  headerBBAT = "(1:BB 2:AT)";
+  if (animal === 'リセ') expect = "等価期待値1479";
+  if (animal === 'AT間天井狙い' && expVal !== "") expect = `等価期待値${expVal}`;
+ }
+ if (machine === 'マギアレコード') {
+  customTitle = `(まどマギ AT間天井狙い${machineNoVal})`;
+  headerBBAT = "(1:RB 2:BB 3:AT)";
+  if (expVal !== "") expect = `等価期待値${expVal}`;
+ }
+ if (machine === 'ミリオンゴッド') {
+  headerBBAT = "(1:初当 2:連荘)";
+  if (animal === 'AT間連荘狙い') {
+   if (expVal !== "") expect = `等価期待値${expVal}`;
+  } else if (animal === '前回VVV揃い後') {
+   machineRate = "機械割#130";
+  } else if (['前回Z-ZONE後', '前回赤7揃い後', '前回天井到達後'].includes(animal)) {
+   machineRate = "機械割#102";
+  } else if (['前回GOD揃い後', '前回5連以上後', '前々回赤7揃い後', '前々回Z-ZONE後', '前々回VVV揃い後'].includes(animal)) {
+   machineRate = "機械割#101";
+  }
  }
 
  const gainText = "獲得玉###" + [...tenseiHistory].reverse().map(x=>x.gain).join("#");
+ 
+ // 大当たりフラグ出力ロジックの振り分け
  const hitText = tenseiHistory.map(x=>{
-  if(machine==='ミリオンゴッド') return `${x.game}#${x.chain===1?1: x.chain}`;
+  if (machine === '鉄拳') {
+   if (x.bType === '青7') return `${x.game}#1`;
+   if (x.bType === '赤7') return `${x.game}#1#2`;
+   if (x.bType === '直撃') return `${x.game}#2`;
+  }
+  if (machine === 'マギアレコード') {
+   if (x.bType === 'みたまボーナス') return `${x.game}#1`;
+   if (x.bType === 'ビッグボーナス') return `${x.game}#2`;
+   if (x.bType === 'ビッグ→ラッシュ') return `${x.game}#2#3`;
+   if (x.bType === 'ラッシュ') return `${x.game}#3`;
+  }
+  if (machine === 'ミリオンゴッド') {
+   if (Number(x.chain) <= 1) return `${x.game}#1#2`; // 単発
+   return `${x.game}#1#2###${x.chain}`; // 2連以上
+  }
+  // 通常（北斗など）
   if(x.chain===1) return `${x.game}#1`;
   return `${x.game}#1#2###${x.chain}`;
  }).join("\n");
 
- const headerBBAT = (machine==='鉄拳') ? "(1:BB 2:AT)" : "(1:RB 2:AT)";
- const totalSpinV = document.getElementById("totalSpin").value||0;
- const remainBallV = document.getElementById("remainBall").value||0;
- const saveBallV = document.getElementById("saveBall").value||0;
- const cashBallV = document.getElementById("cashBall").value||0;
- const yameGameV = document.getElementById("yameGame").value||0;
- const startSpinV = document.getElementById("startSpin").value||0;
- const rateV = document.getElementById("rate").value;
+ const totalSpinV = getVal("totalSpin");
+ const sitDownTotalSpinV = getVal("sitDownTotalSpin");
+ const remainBallV = getVal("remainBall");
+ const saveBallV = getVal("saveBall");
+ const cashBallV = getVal("cashBall");
+ const yameGameV = getVal("yameGame");
+ const startSpinV = getVal("startSpin");
+ const rateV = getVal("rate");
  const storeV = document.getElementById("store").value;
- const daiBanV = document.getElementById("daiBan").value||0;
+ const daiBanV = getVal("daiBan");
+
+ // 出力テキストの組み立て（不要な改行位置の調整）
+ let condSection = expect !== "" ? expect : machineRate;
 
  tOutput.textContent=`機種番号${baseNo}
 計算条件1
-(${machine} ${animal}${machineNoVal})
+${customTitle}
 ${headerBBAT}
 
-${expect}
-${machineRate}
+${condSection}
 仕事量同集計
 総回転数${totalSpinV}
 
@@ -313,7 +425,7 @@ ${hitText}
 
 着席時回転数${startSpinV}
 天井消化${startSpinV}
-着席時総回転数${totalSpinV}
+着席時総回転数${sitDownTotalSpinV}
 換金率1000#${rateV}
 貸玉1000#${rateV}
 
@@ -341,15 +453,24 @@ function calculate(){
  const op = document.getElementById("output");
  if(!sd || !sl || !iv || !ch || !op) return;
 
- const seedV=Number(sd.value||0); const salaryV=Number(sl.value||0); const investV=Number(iv.value||0); const cashV=Number(ch.value||0);
- const next=seedV+cashV-salaryV-investV;
+ const seedV=sd.value===""?"":Number(sd.value).toLocaleString();
+ const salaryV=sl.value===""?"":Number(sl.value).toLocaleString();
+ const investV=iv.value===""?"":Number(iv.value).toLocaleString();
+ const cashV=ch.value===""?"":Number(ch.value).toLocaleString();
+ 
+ let nextV = "";
+ if(sd.value!=="" || ch.value!=="" || sl.value!=="" || iv.value!=="") {
+  const next=(Number(sd.value||0)+Number(ch.value||0)-Number(sl.value||0)-Number(iv.value||0));
+  nextV = next.toLocaleString();
+ }
+
  const d=new Date(); const w=["日","月","火","水","木","金","土"];
  resultText=`${d.getMonth()+1}/${d.getDate()}(${w[d.getDay()]})${USER_NAME}
-種銭${seedV.toLocaleString()}
-日当${salaryV.toLocaleString()}
-投資${investV.toLocaleString()}
-換金${cashV.toLocaleString()}
-次回${next.toLocaleString()}`;
+種銭${seedV}
+日当${salaryV}
+投資${investV}
+換金${cashV}
+次回${nextV}`;
  op.textContent=resultText;
 }
 </script>

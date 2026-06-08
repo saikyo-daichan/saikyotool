@@ -8,54 +8,21 @@
 body{font-family:sans-serif;max-width:700px;margin:auto;padding:20px;background-color:#1a1a1a;color:#ddd;}
 input,select,button{width:100%;padding:12px;margin-bottom:10px;box-sizing:border-box;border-radius:4px;}
 input,select{background:#2d2d2d;border:1px solid #444;color:#fff;}
-button{cursor:pointer;background-color:#3f51b5;color:#fff;border:none;font-weight:bold;}
+button{cursor:pointer;background-color:#3f51b5;color:#fff;border:none;font-weight:bold;-webkit-tap-highlight-color:transparent;}
 button:hover{background-color:#303f9f;}
 .hidden{display:none}
 .box{border:1px solid #444;border-radius:8px;padding:10px;margin-top:10px;background:#2d2d2d;}
 pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#00e676;}
 .row{display:flex;gap:8px}
-.row input, .row select{margin-bottom:10px} /* 横並び時の余白調整 */
+.row input, .row select{margin-bottom:10px}
 .smallbtn{width:auto;padding:4px 8px;margin-left:8px;background-color:#e53935;}
 .smallbtn:hover{background-color:#c62828;}
-.grid3{
- display:grid;
- grid-template-columns:repeat(3,1fr);
- gap:10px;
- margin-top:10px;
- margin-bottom:30px;
-}
-.grid3 button{
- margin:0;
-}
-.nav-grid {
- display: grid;
- grid-template-columns: repeat(2, 1fr);
- gap: 10px;
- margin-top: 20px;
-}
-.val {
- font-size: 1.4rem;
- font-weight: bold;
- color: #ffca28;
- margin-top: 5px;
-}
-/* 3分割用のグリッドスタイル */
-.grid-col3 {
- display: grid;
- grid-template-columns: repeat(3, 1fr);
- gap: 8px;
-}
-/* リセットボタン用の目立つスタイル */
-.btn-reset {
- background-color: #757575;
- color: #fff;
- margin-top: 15px;
- font-size: 0.9rem;
- padding: 8px;
-}
-.btn-reset:hover {
- background-color: #616161;
-}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;margin-bottom:30px;}
+.grid3 button{margin:0;}
+.nav-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:20px;}
+.grid-col3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.btn-reset{background-color:#757575;color:#fff;margin-bottom:15px;font-size:0.9rem;padding:8px;}
+.btn-reset:hover {background-color:#616161;}
 </style>
 </head>
 <body>
@@ -80,22 +47,18 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 
 <!-- 攻略情報エリア -->
 <div id="kouryakuArea" class="hidden">
- <h2>攻略</h2>
+ <h2>攻略情報</h2>
  <div class="grid3">
   <button onclick="showKouryakuPage('北斗転生2')">北斗転生2</button>
   <button onclick="showKouryakuPage('鉄拳6')">鉄拳6</button>
   <button onclick="showKouryakuPage('北斗の拳')">北斗の拳</button>
   <button onclick="showKouryakuPage('ミリオンゴッド')">ミリオンゴッド</button>
   <button onclick="showKouryakuPage('マギアレコード')">マギアレコード</button>
-  <button onclick="showKouryakuPage('未設定')">未設定</button>
-  <button onclick="showKouryakuPage('未設定')">未設定</button>
-  <button onclick="showKouryakuPage('未設定')">未設定</button>
-  <button onclick="showKouryakuPage('未設定')">未設定</button>
+  <button onclick="showKouryakuPage('未設定')">未設定</button><button onclick="showKouryakuPage('未設定')">未設定</button><button onclick="showKouryakuPage('未設定')">未設定</button><button onclick="showKouryakuPage('未設定')">未設定</button>
  </div>
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
 
-<!-- 各攻略個別ページ -->
 <div id="hokutoTensei2Area" class="hidden"><h2>北斗転生2</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 <div id="tekken6Area" class="hidden"><h2>鉄拳6</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 <div id="hokutoArea" class="hidden"><h2>北斗の拳</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
@@ -106,66 +69,50 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 <!-- 台データ作成エリア -->
 <div id="tenseiArea" class="hidden">
  <h2>データ作成</h2>
+ 
+ <button onclick="resetAllTenseiFields()" class="btn-reset">⚠️ 入力内容と履歴をすべて消去（リセット）</button>
+
  <select id="machine" onchange="updateAnimalOptions(); updateInputFields(); updateTenseiPreview(); saveAllInputs();">
-  <option value="北斗転生" selected>北斗転生</option>
+  <option value="北斗転生">北斗転生</option>
   <option value="鉄拳">鉄拳</option>
-  <option value="北斗">北斗</option>
+  <option value="北斗" selected>北斗</option>
   <option value="ミリオンゴッド">ミリオンゴッド</option>
   <option value="マギアレコード">マギアレコード</option>
  </select>
  <select id="store" onchange="updateTenseiPreview(); saveAllInputs();">
-  <option>メガサイバー新鎌ヶ谷</option>
-  <option>ピア柏</option>
-  <option>楽園柏</option>
+  <option>メガサイバー新鎌ヶ谷</option><option>ピア柏</option><option>楽園柏</option>
  </select>
- 
  <div class="row">
   <input id="machineNo" type="number" placeholder="何台目か" oninput="updateTenseiPreview(); saveAllInputs();">
   <input id="daiBan" type="number" placeholder="台番" oninput="updateTenseiPreview(); saveAllInputs();">
  </div>
- 
  <select id="animal" onchange="updateInputFields(); updateTenseiPreview(); saveAllInputs();"></select>
  <input id="valueExpect" type="number" placeholder="等価期待値" oninput="updateTenseiPreview(); saveAllInputs();" class="hidden">
- 
- <!-- 回転数関連を3列横並びに統合 -->
  <div class="grid-col3">
   <input id="startSpin" type="number" placeholder="回転数" oninput="updateTenseiPreview(); saveAllInputs();">
   <input id="totalSpin" type="number" placeholder="総回転数" oninput="updateTenseiPreview(); saveAllInputs();">
   <input id="sitDownTotalSpin" type="number" placeholder="着席総回" oninput="updateTenseiPreview(); saveAllInputs();">
  </div>
- 
- <!-- 持玉関連を横並びに統合 -->
+ <input id="recentSamai" type="number" placeholder="直近差枚" oninput="updateTenseiPreview(); saveAllInputs();" class="hidden">
  <div class="row">
   <input id="remainBall" type="number" placeholder="残玉" oninput="updateTenseiPreview(); saveAllInputs();">
   <input id="saveBall" type="number" placeholder="貯玉" oninput="updateTenseiPreview(); saveAllInputs();">
  </div>
- 
- <!-- ★現金と総投資を横並びに統合 -->
  <div class="row">
   <input id="cashBall" type="number" placeholder="現金" oninput="updateTenseiPreview(); saveAllInputs();">
   <input id="totalInvestment" type="number" placeholder="総投資" oninput="updateTenseiPreview(); saveAllInputs();">
  </div>
- 
  <div class="row">
   <input id="yameGame" type="number" placeholder="やめ" oninput="updateTenseiPreview(); saveAllInputs();">
-  <select id="rate" onchange="updateTenseiPreview(); saveAllInputs();">
-   <option>46</option>
-   <option>50</option>
-  </select>
+  <select id="rate" onchange="updateTenseiPreview(); saveAllInputs();"><option>46</option><option>50</option></select>
  </div>
- 
  <div class="box">
-  <div class="row" id="hitInputRow">
-   <!-- 動的に中身が切り替わるエリア -->
-  </div>
+  <div class="row" id="hitInputRow"></div>
   <button onclick="addEntry()" style="margin-top:10px; background-color:#ff9800;">履歴追加</button>
  </div>
  <div id="historyList" class="box"></div>
  <button onclick="copyTensei(event)" style="background-color:#4caf50;">データをコピーする</button>
  <pre id="tenseiOutput" class="box"></pre>
- 
- <!-- 入力内容を全消去するリセットボタン -->
- <button onclick="resetAllTenseiFields()" class="btn-reset">⚠️ 入力内容と履歴をすべて消去（リセット）</button>
  <hr style="margin-top: 15px; margin-bottom: 15px; border-color: #444;">
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
@@ -173,16 +120,13 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 <!-- 精算エリア -->
 <div id="seisanArea" class="hidden">
  <h2>精算</h2>
- <input id="seed" type="number" placeholder="種銭">
- <input id="salary" type="number" placeholder="日当">
- <input id="investment" type="number" placeholder="投資">
- <input id="cash" type="number" placeholder="換金">
+ <input id="seed" type="number" placeholder="種銭"><input id="salary" type="number" placeholder="日当"><input id="investment" type="number" placeholder="投資"><input id="cash" type="number" placeholder="換金">
  <button onclick="calculate()" style="background-color:#ff9800;">収支計算を実行</button>
  <button onclick="copyText(event)" style="background-color:#4caf50;">結果をコピーする</button>
  <pre id="output" class="box"></pre>
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
- 
+
 <script>
 const APP_NAME="最強ツール";
 const PASSWORD="120708";
@@ -194,84 +138,9 @@ let tenseiHistory=[];
 window.onload=()=>{
  document.title=APP_NAME;
  document.querySelectorAll(".appTitle").forEach(x=>x.innerText=APP_NAME);
- 
- if(localStorage.getItem("loggedIn")==="true") {
-  showMenu();
- } else {
-  showLogin();
- }
- 
- updateAnimalOptions();
- updateInputFields();
- loadSavedInputs();
+ if(localStorage.getItem("loggedIn")==="true") showMenu(); else showLogin();
+ updateAnimalOptions(); updateInputFields(); loadSavedInputs();
 };
-
-function saveAllInputs() {
- const fields = [
-  "machine", "store", "machineNo", "daiBan", "animal", 
-  "valueExpect", "startSpin", "totalSpin", "sitDownTotalSpin", 
-  "remainBall", "saveBall", "cashBall", "totalInvestment", "yameGame", "rate"
- ];
- const backupData = {};
- fields.forEach(id => {
-  const el = document.getElementById(id);
-  if (el) backupData[id] = el.value;
- });
- backupData["tenseiHistory"] = tenseiHistory;
- 
- localStorage.setItem('tensei_auto_backup', JSON.stringify(backupData));
-}
-
-function loadSavedInputs() {
- const savedDataRaw = localStorage.getItem('tensei_auto_backup');
- if (!savedDataRaw) {
-  updateTenseiPreview();
-  return;
- }
- 
- const backupData = JSON.parse(savedDataRaw);
- 
- if (backupData["machine"]) document.getElementById("machine").value = backupData["machine"];
- updateAnimalOptions();
- 
- if (backupData["animal"]) document.getElementById("animal").value = backupData["animal"];
- updateInputFields();
-
- const fields = [
-  "store", "machineNo", "daiBan", "valueExpect", "startSpin", 
-  "totalSpin", "sitDownTotalSpin", "remainBall", "saveBall", 
-  "cashBall", "totalInvestment", "yameGame", "rate"
- ];
- fields.forEach(id => {
-  if (backupData[id] !== undefined && document.getElementById(id)) {
-   document.getElementById(id).value = backupData[id];
-  }
- });
- 
- if (backupData["tenseiHistory"]) {
-  tenseiHistory = backupData["tenseiHistory"];
- }
- 
- updateTenseiPreview();
-}
-
-function resetAllTenseiFields() {
- if (!confirm("現在入力されている内容と大当たり履歴をすべて消去してもよろしいですか？")) return;
- 
- const fields = [
-  "machineNo", "daiBan", "valueExpect", "startSpin", "totalSpin", 
-  "sitDownTotalSpin", "remainBall", "saveBall", "cashBall", "totalInvestment", "yameGame"
- ];
- fields.forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.value = "";
- });
- 
- tenseiHistory = [];
- localStorage.removeItem('tensei_auto_backup');
- 
- updateTenseiPreview();
-}
 
 function hideAll(){
  ["loginArea","menuArea","kouryakuArea","hokutoTensei2Area","tekken6Area","hokutoArea","godArea","magirecoArea","unset1Area","tenseiArea","seisanArea"].forEach(id=>{
@@ -284,7 +153,6 @@ function showMenu(){hideAll(); document.getElementById("menuArea").classList.rem
 function showKouryaku(){hideAll(); document.getElementById("kouryakuArea").classList.remove("hidden");}
 function showTensei(){hideAll(); document.getElementById("tenseiArea").classList.remove("hidden"); updateTenseiPreview();}
 function showSeisan(){hideAll(); document.getElementById("seisanArea").classList.remove("hidden");}
-
 function showKouryakuPage(name){
  hideAll();
  const map={"北斗転生2":"hokutoTensei2Area","鉄拳6":"tekken6Area","北斗の拳":"hokutoArea","ミリオンゴッド":"godArea","マギアレコード":"magirecoArea"};
@@ -293,26 +161,16 @@ function showKouryakuPage(name){
 }
 
 function login(){
- if(document.getElementById("password").value===PASSWORD){ 
-  localStorage.setItem("loggedIn","true"); 
-  showMenu(); 
- } else {
-  alert("暗証番号が違います");
- }
+ if(document.getElementById("password").value===PASSWORD){ localStorage.setItem("loggedIn","true"); showMenu(); }
+ else alert("暗証番号が違います");
 }
-
-function logout(){
- localStorage.setItem("loggedIn","false");
- showLogin();
-}
+function logout(){ localStorage.setItem("loggedIn","false"); showLogin(); }
 
 function updateAnimalOptions(){
- const machineEl = document.getElementById('machine');
+ const machine = document.getElementById('machine').value;
  const animalEl = document.getElementById('animal');
- if(!machineEl || !animalEl) return;
- const machine = machineEl.value;
+ if(!machine || !animalEl) return;
  let options=[];
- 
  if(machine==='北斗転生') options=['イノシシ','ウリ坊'];
  else if(machine==='鉄拳') options=['リセ','AT間天井狙い'];
  else if(machine==='北斗') options=['リセ','差枚'];
@@ -320,193 +178,141 @@ function updateAnimalOptions(){
  else if(machine==='マギアレコード') options=['AT間天井狙い'];
  
  animalEl.innerHTML='';
- options.forEach(o=>{
-  const opt=document.createElement('option');
-  opt.value=o; opt.textContent=o; animalEl.appendChild(opt);
- });
- 
- if(options.length <= 1) animalEl.classList.add("hidden");
- else animalEl.classList.remove("hidden");
+ options.forEach(o=>{ const opt=document.createElement('option'); opt.value=o; opt.textContent=o; animalEl.appendChild(opt); });
+ if(options.length <= 1) animalEl.classList.add("hidden"); else animalEl.classList.remove("hidden");
 }
 
 function updateInputFields() {
  const machine = document.getElementById('machine').value;
  const animal = document.getElementById('animal').value;
  const expectInput = document.getElementById('valueExpect');
+ const recentSamaiInput = document.getElementById('recentSamai');
  const row = document.getElementById('hitInputRow');
  
- if ((machine === '鉄拳' && animal === 'AT間天井狙い') || 
-     (machine === 'ミリオンゴッド' && animal === 'AT間連荘狙い') || 
-     machine === 'マギアレコード') {
+ if ((machine === '鉄拳' && animal === 'AT間天井狙い') || (machine === 'ミリオンゴッド' && animal === 'AT間連荘狙い') || machine === 'マギアレコード') {
   expectInput.classList.remove("hidden");
  } else {
   expectInput.classList.add("hidden");
  }
 
+ if (machine === '北斗') { recentSamaiInput.classList.remove("hidden"); } 
+ else { recentSamaiInput.classList.add("hidden"); }
+
  if (machine === '鉄拳') {
-  row.innerHTML = `
-   <input id="hitGame" type="number" placeholder="G数">
-   <select id="bonusType">
-    <option value="青7">青7</option>
-    <option value="赤7">赤7</option>
-    <option value="直撃">直撃</option>
-   </select>
-   <input id="gainBall" type="number" placeholder="枚数">`;
+  row.innerHTML = `<input id="hitGame" type="number" placeholder="G数"><select id="bonusType"><option value="青7">青7</option><option value="赤7">赤7</option><option value="直撃">直撃</option></select><input id="gainBall" type="number" placeholder="枚数">`;
  } else if (machine === 'マギアレコード') {
-  row.innerHTML = `
-   <input id="hitGame" type="number" placeholder="G数">
-   <select id="bonusType">
-    <option value="みたまボーナス">みたま</option>
-    <option value="ビッグボーナス">ビッグ</option>
-    <option value="ビッグ→ラッシュ">B+R</option>
-    <option value="ラッシュ">RUSH</option>
-   </select>
-   <input id="gainBall" type="number" placeholder="枚数">`;
+  row.innerHTML = `<input id="hitGame" type="number" placeholder="G数"><select id="bonusType"><option value="みたまボーナス">みたま</option><option value="ビッグボーナス">ビッグ</option><option value="ビッグ→ラッシュ">B+R</option><option value="ラッシュ">RUSH</option></select><input id="gainBall" type="number" placeholder="枚数">`;
  } else {
-  row.innerHTML = `
-   <input id="hitGame" type="number" placeholder="G数">
-   <input id="chainCount" type="number" placeholder="連荘">
-   <input id="gainBall" type="number" placeholder="枚数">`;
+  row.innerHTML = `<input id="hitGame" type="number" placeholder="G数"><input id="chainCount" type="number" placeholder="連荘"><input id="gainBall" type="number" placeholder="枚数">`;
  }
+}
+
+function saveAllInputs() {
+ const fields = ["machine", "store", "machineNo", "daiBan", "animal", "valueExpect", "startSpin", "totalSpin", "sitDownTotalSpin", "recentSamai", "remainBall", "saveBall", "cashBall", "totalInvestment", "yameGame", "rate"];
+ const backupData = {};
+ fields.forEach(id => { const el = document.getElementById(id); if (el) backupData[id] = el.value; });
+ backupData["tenseiHistory"] = tenseiHistory;
+ localStorage.setItem('tensei_auto_backup', JSON.stringify(backupData));
+}
+
+function loadSavedInputs() {
+ const savedDataRaw = localStorage.getItem('tensei_auto_backup');
+ if (!savedDataRaw) { updateTenseiPreview(); return; }
+ const backupData = JSON.parse(savedDataRaw);
+ if (backupData["machine"]) document.getElementById("machine").value = backupData["machine"];
+ updateAnimalOptions();
+ if (backupData["animal"]) document.getElementById("animal").value = backupData["animal"];
+ updateInputFields();
+ const fields = ["store", "machineNo", "daiBan", "valueExpect", "startSpin", "totalSpin", "sitDownTotalSpin", "recentSamai", "remainBall", "saveBall", "cashBall", "totalInvestment", "yameGame", "rate"];
+ fields.forEach(id => { if (backupData[id] !== undefined && document.getElementById(id)) document.getElementById(id).value = backupData[id]; });
+ if (backupData["tenseiHistory"]) tenseiHistory = backupData["tenseiHistory"];
+ updateTenseiPreview();
+}
+
+function resetAllTenseiFields() {
+ if (!confirm("現在入力されている内容と大当たり履歴をすべて消去してもよろしいですか？")) return;
+ const fields = ["machineNo", "daiBan", "valueExpect", "startSpin", "totalSpin", "sitDownTotalSpin", "recentSamai", "remainBall", "saveBall", "cashBall", "totalInvestment", "yameGame"];
+ fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+ tenseiHistory = []; localStorage.removeItem('tensei_auto_backup'); updateTenseiPreview();
 }
 
 function addEntry(){
- const hG = document.getElementById("hitGame");
- const gB = document.getElementById("gainBall");
- const cC = document.getElementById("chainCount");
- const bT = document.getElementById("bonusType");
- 
+ const hG = document.getElementById("hitGame"), gB = document.getElementById("gainBall");
+ const cC = document.getElementById("chainCount"), bT = document.getElementById("bonusType");
  if(!hG || !gB) return;
- const game = Number(hG.value); 
- const gain = Number(gB.value);
- let chain = "";
- let bType = "";
- 
- if (cC) {
-  chain = Number(cC.value);
-  if(!game || !chain) return;
- } else if (bT) {
-  bType = bT.value;
-  if(!game) return;
- }
- 
+ const game = Number(hG.value), gain = Number(gB.value);
+ let chain = "", bType = "";
+ if (cC) { chain = Number(cC.value); if(!game || !chain) return; } 
+ else if (bT) { bType = bT.value; if(!game) return; }
  tenseiHistory.unshift({game, chain, gain, bType});
  hG.value=""; if(cC) cC.value=""; gB.value="";
- updateTenseiPreview();
- saveAllInputs();
+ updateTenseiPreview(); saveAllInputs();
 }
-
-function deleteEntry(i){ 
- tenseiHistory.splice(i,1); 
- updateTenseiPreview(); 
- saveAllInputs();
-}
+function deleteEntry(i){ tenseiHistory.splice(i,1); updateTenseiPreview(); saveAllInputs(); }
 
 function updateTenseiPreview(){
- const hList = document.getElementById("historyList");
- const tOutput = document.getElementById("tenseiOutput");
+ const hList = document.getElementById("historyList"), tOutput = document.getElementById("tenseiOutput");
  if(!hList || !tOutput) return;
-
- const machine = document.getElementById('machine').value;
- const animal = document.getElementById('animal').value;
+ const machine = document.getElementById('machine').value, animal = document.getElementById('animal').value;
 
  hList.innerHTML=tenseiHistory.map((x,i)=>{
   let midText = x.chain !== "" ? `${x.chain}連` : `${x.bType}`;
-  return `<div>${x.game}G → ${midText} → ${x.gain}玉 <button class="smallbtn" onclick="deleteEntry(${i})">削除</button></div>`;
+  return `<div>${x.game}G → ${midText} → ${x.gain}枚 <button class="smallbtn" onclick="deleteEntry(${i})">削除</button></div>`;
  }).join("\n");
 
- const getVal = (id) => {
-  const el = document.getElementById(id);
-  if (!el || el.value === "") return "";
-  return el.value;
- };
-
- const machineNoVal = getVal("machineNo");
- const expVal = getVal("valueExpect");
+ const getVal = (id) => { const el = document.getElementById(id); return (!el || el.value === "") ? "" : el.value; };
+ const machineNoVal = getVal("machineNo"), expVal = getVal("valueExpect");
  
- let baseNo = 3818;
- if (machine === '北斗') baseNo = 3840;
- 
- let machineRate = ""; 
- let expect = "";
- let headerBBAT = "(1:RB 2:AT)";
- let customTitle = `(${machine} ${animal}${machineNoVal})`;
+ let baseNo = 3818; if (machine === '北斗') baseNo = 3840;
+ let machineRate = "", expect = "", headerBBAT = "(1:RB 2:AT)", customTitle = `(${machine} ${animal}${machineNoVal})`;
 
- if (machine === '北斗転生') {
-  machineRate = animal === 'ウリ坊' ? "機械割#99" : "機械割#106";
- }
- if (machine === '鉄拳') {
-  headerBBAT = "(1:BB 2:AT)";
-  if (animal === 'リセ') expect = "等価期待値1479";
-  if (animal === 'AT間天井狙い' && expVal !== "") expect = `等価期待値${expVal}`;
- }
- if (machine === 'マギアレコード') {
-  customTitle = `(まどマギ AT間天井狙い${machineNoVal})`;
-  headerBBAT = "(1:RB 2:BB 3:AT)";
-  if (expVal !== "") expect = `等価期待値${expVal}`;
- }
+ if (machine === '北斗転生') machineRate = animal === 'ウリ坊' ? "機械割#99" : "機械割#106";
+ if (machine === '鉄拳') { headerBBAT = "(1:BB 2:AT)"; if (animal === 'リセ') expect = "等価期待値1479"; if (animal === 'AT間天井狙い' && expVal !== "") expect = `等価期待値${expVal}`; }
+ if (machine === 'マギアレコード') { customTitle = `(まどマギ AT間天井狙い${machineNoVal})`; headerBBAT = "(1:RB 2:BB 3:AT)"; if (expVal !== "") expect = `等価期待値${expVal}`; }
  if (machine === 'ミリオンゴッド') {
   headerBBAT = "(1:初当 2:連荘)";
-  if (animal === 'AT間連荘狙い') {
-   if (expVal !== "") expect = `等価期待値${expVal}`;
-  } else if (animal === '前回VVV揃い後') {
-   machineRate = "機械割#130";
-  } else if (['前回Z-ZONE後', '前回赤7揃い後', '前回天井到達後'].includes(animal)) {
-   machineRate = "機械割#102";
-  } else if (['前回GOD揃い後', '前回5連以上後', '前々回赤7揃い後', '前々回Z-ZONE後', '前々回VVV揃い後'].includes(animal)) {
-   machineRate = "機械割#101";
-  }
+  if (animal === 'AT間連荘狙い') { if (expVal !== "") expect = `等価期待値${expVal}`; } 
+  else if (animal === '前回VVV揃い後') machineRate = "機械割#130";
+  else if (['前回Z-ZONE後', '前回赤7揃い後', '前回天井到達後'].includes(animal)) machineRate = "機械割#102";
+  else if (['前回GOD揃い後', '前回5連以上後', '前々回赤7揃い後', '前々回Z-ZONE後', '前々回VVV揃い後'].includes(animal)) machineRate = "機械割#101";
  }
 
  const gainText = "獲得玉###" + [...tenseiHistory].reverse().map(x=>x.gain).join("#");
- 
  const hitText = tenseiHistory.map(x=>{
-  if (machine === '鉄拳') {
-   if (x.bType === '青7') return `${x.game}#1`;
-   if (x.bType === '赤7') return `${x.game}#1#2`;
-   if (x.bType === '直撃') return `${x.game}#2`;
-  }
-  if (machine === 'マギアレコード') {
-   if (x.bType === 'みたまボーナス') return `${x.game}#1`;
-   if (x.bType === 'ビッグボーナス') return `${x.game}#2`;
-   if (x.bType === 'ビッグ→ラッシュ') return `${x.game}#2#3`;
-   if (x.bType === 'ラッシュ') return `${x.game}#3`;
-  }
-  if (machine === 'ミリオンゴッド') {
-   if (Number(x.chain) <= 1) return `${x.game}#1#2`;
-   return `${x.game}#1#2###${x.chain}`;
-  }
-  if (Number(x.chain) === 1) return `${x.game}#1#2`;
-  return `${x.game}#1#2###${x.chain}`;
+  if (machine === '鉄拳') { if (x.bType === '青7') return `${x.game}#1`; if (x.bType === '赤7') return `${x.game}#1#2`; if (x.bType === '直撃') return `${x.game}#2`; }
+  if (machine === 'マギアレコード') { if (x.bType === 'みたまボーナス') return `${x.game}#1`; if (x.bType === 'ビッグボーナス') return `${x.game}#2`; if (x.bType === 'ビッグ→ラッシュ') return `${x.game}#2#3`; if (x.bType === 'ラッシュ') return `${x.game}#3`; }
+  if (machine === 'ミリオンゴッド') { if (Number(x.chain) <= 1) return `${x.game}#1#2`; return `${x.game}#1#2###${x.chain}`; }
+  if (Number(x.chain) === 1) return `${x.game}#1#2`; return `${x.game}#1#2###${x.chain}`;
  }).join("\n");
 
- const totalSpinV = getVal("totalSpin");
- const sitDownTotalSpinV = getVal("sitDownTotalSpin");
- const remainBallV = getVal("remainBall");
- const saveBallV = getVal("saveBall");
- const cashBallV = getVal("cashBall");
- const totalInvestV = getVal("totalInvestment");
- const yameGameV = getVal("yameGame");
- const startSpinV = getVal("startSpin");
- const rateV = getVal("rate");
- const storeV = document.getElementById("store").value;
- const daiBanV = getVal("daiBan");
+ const totalSpinV = getVal("totalSpin"), sitDownTotalSpinV = getVal("sitDownTotalSpin");
+ const remainBallV = getVal("remainBall"), saveBallV = getVal("saveBall");
+ const cashBallV = getVal("cashBall"), totalInvestV = getVal("totalInvestment");
+ const yameGameV = getVal("yameGame"), startSpinV = getVal("startSpin");
+ const recentSamaiV = getVal("recentSamai"), rateV = getVal("rate");
+ const storeV = document.getElementById("store").value, daiBanV = getVal("daiBan");
 
  let condSection = expect !== "" ? expect : machineRate;
 
- let cashOutput = cashBallV !== "" ? cashBallV : "0";
- if (totalInvestV !== "") {
-  cashOutput += `(${totalInvestV})`;
- }
+ let cashOutput = "";
+ if (cashBallV === "") { cashOutput = (totalInvestV !== "") ? `(${totalInvestV})` : ""; } 
+ else { cashOutput = cashBallV + ((totalInvestV !== "") ? `(${totalInvestV})` : ""); }
 
  const hitSection = hitText !== "" ? `${hitText}\n` : "";
 
+ let spinFooterSection = "";
+ if (machine === '北斗') {
+  spinFooterSection = `\n直近差枚${recentSamaiV}\n天井消化${startSpinV}\n着席時回転数${startSpinV}\n着席時総回転数${sitDownTotalSpinV}`;
+ } else {
+  spinFooterSection = `\n着席時回転数${startSpinV}\n天井消化${startSpinV}\n着席時総回転数${sitDownTotalSpinV}`;
+ }
+
+ // ★北斗/ミリオンゴッド/マギレコ等の条件分岐に関係なく、カスタムタイトル直後の空行数を調節して無駄なスペースを完全カット！
  tOutput.textContent=`機種番号${baseNo}
 計算条件1
 ${customTitle}
 ${headerBBAT}
-
-${condSection}
+${condSection !== "" ? "\n" + condSection : ""}
 仕事量同集計
 総回転数${totalSpinV}
 
@@ -517,10 +323,7 @@ ${gainText}
 現金${cashOutput}
 
 ${yameGameV}#0
-${hitSection}
-着席時回転数${startSpinV}
-天井消化${startSpinV}
-着席時総回転数${sitDownTotalSpinV}
+${hitSection}${spinFooterSection}
 換金率1000#${rateV}
 貸玉1000#${rateV}
 
@@ -529,23 +332,9 @@ ${hitSection}
 名前${USER_NAME}`;
 }
 
-async function copyTensei(e){
- const btn=e.target;
- const tOutput = document.getElementById("tenseiOutput");
- try{ await navigator.clipboard.writeText(tOutput.textContent); const old=btn.innerText; btn.innerText="コピーしました！"; setTimeout(()=>btn.innerText=old||"データをコピーする",1000); }catch(err){alert("コピー失敗");}
-}
-
-async function copyText(e){
- const btn=e.target;
- try{ await navigator.clipboard.writeText(resultText); const old=btn.innerText; btn.innerText="コピーしました！"; setTimeout(()=>btn.innerText=old||"結果をコピーする",1000); }catch(err){alert("コピー失敗");}
-}
-
 function calculate(){
- const sd = document.getElementById("seed");
- const sl = document.getElementById("salary");
- const iv = document.getElementById("investment");
- const ch = document.getElementById("cash");
- const op = document.getElementById("output");
+ const sd = document.getElementById("seed"), sl = document.getElementById("salary");
+ const iv = document.getElementById("investment"), ch = document.getElementById("cash"), op = document.getElementById("output");
  if(!sd || !sl || !iv || !ch || !op) return;
 
  const seedV=sd.value===""?"":Number(sd.value).toLocaleString();
@@ -555,19 +344,15 @@ function calculate(){
  
  let nextV = "";
  if(sd.value!=="" || ch.value!=="" || sl.value!=="" || iv.value!=="") {
-  const next=(Number(sd.value||0)+Number(ch.value||0)-Number(sl.value||0)-Number(iv.value||0));
-  nextV = next.toLocaleString();
+  nextV = (Number(sd.value||0)+Number(ch.value||0)-Number(sl.value||0)-Number(iv.value||0)).toLocaleString();
  }
-
- const d=new Date(); const w=["日","月","火","水","木","金","土"];
- resultText=`${d.getMonth()+1}/${d.getDate()}(${w[d.getDay()]})${USER_NAME}
-種銭${seedV}
-日当${salaryV}
-投資${investV}
-換金${cashV}
-次回${nextV}`;
+ const d=new Date(), w=["日","月","火","水","木","金","土"];
+ resultText=`${d.getMonth()+1}/${d.getDate()}(${w[d.getDay()]})${USER_NAME}\n種銭${seedV}\n日当${salaryV}\n投資${investV}\n換金${cashV}\n次回${nextV}`;
  op.textContent=resultText;
 }
+
+async function copyTensei(e){ try{ await navigator.clipboard.writeText(document.getElementById("tenseiOutput").textContent); e.target.innerText="コピーしました！"; setTimeout(()=>e.target.innerText="データをコピーする",1000); }catch(err){alert("コピー失敗");} }
+async function copyText(e){ try{ await navigator.clipboard.writeText(resultText); e.target.innerText="コピーしました！"; setTimeout(()=>e.target.innerText="結果をコピーする",1000); }catch(err){alert("コピー失敗");} }
 </script>
 </body>
 </html>

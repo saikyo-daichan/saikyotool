@@ -38,14 +38,12 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 </head>
 <body>
 
-<!-- ログインエリア -->
 <div id="loginArea">
  <h2 class="appTitle">暗証番号入力</h2>
  <input id="password" type="password" placeholder="暗証番号">
  <button onclick="login()">ログイン</button>
 </div>
 
-<!-- メニューエリア -->
 <div id="menuArea" class="hidden">
  <h2 class="appTitle">メニュー</h2>
  <div class="nav-grid">
@@ -54,9 +52,9 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
   <button onclick="showSeisan()">収支精算</button>
   <button onclick="showIdleGame()" style="background-color:#009688;">放置ゲー</button>
  </div>
+ <button onclick="logout()" style="background-color: #555; margin-top:20px;">ログアウト</button>
 </div>
 
-<!-- 攻略情報エリア -->
 <div id="kouryakuArea" class="hidden">
  <h2>攻略情報</h2>
  <div class="grid3">
@@ -77,7 +75,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 <div id="magirecoArea" class="hidden"><h2>マギアレコード</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 <div id="unset1Area" class="hidden"><h2>未設定</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 
-<!-- 台データ作成エリア -->
 <div id="tenseiArea" class="hidden">
  <h2>データ作成</h2>
  <button onclick="resetAllTenseiFields()" class="btn-reset">⚠️ 入力内容と履歴をすべて消去（リセット）</button>
@@ -122,7 +119,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
 
-<!-- 精算エリア -->
 <div id="seisanArea" class="hidden">
  <h2>精算</h2>
  <input id="seed" type="number" placeholder="種銭"><input id="salary" type="number" placeholder="日当"><input id="investment" type="number" placeholder="投資"><input id="cash" type="number" placeholder="換金">
@@ -132,7 +128,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
 
-<!-- 放置ゲームエリア -->
 <div id="idleGameArea" class="hidden game-container">
  <div class="box" style="padding: 8px;">
   <h3 style="margin:4px 0; color:#00e676; font-size:1.1rem;">🛒 エリア限定ショップ (クリア毎にリセット)</h3>
@@ -233,8 +228,23 @@ window.onload=()=>{
  updateAnimalOptions(); updateInputFields(); loadSavedInputs(); loadGameBackend();
 };
 
-function showIdleGame(){ hideAll(); document.getElementById("idleGameArea").classList.remove("hidden"); updateGameUI(); initStageTimer(); }
+function hideAll(){
+ ["loginArea","menuArea","kouryakuArea","hokutoTensei2Area","tekken6Area","hokutoArea","godArea","magirecoArea","unset1Area","tenseiArea","seisanArea","idleGameArea"].forEach(id=>{
+  const el = document.getElementById(id); if(el) el.classList.add("hidden");
+ });
+}
+
+function showLogin(){hideAll(); document.getElementById("loginArea").classList.remove("hidden"); document.getElementById("password").value="";}
+// ★バグ完全修正：メニューを開くときに非表示処理(hideAll)をちゃんと走らせてから、放置タイマーを止める！
 function showMenu(){ hideAll(); document.getElementById("menuArea").classList.remove("hidden"); stopStageTimer(); }
+function showKouryaku(){hideAll(); document.getElementById("kouryakuArea").classList.remove("hidden");}
+function showTensei(){hideAll(); document.getElementById("tenseiArea").classList.remove("hidden"); updateTenseiPreview();}
+function showSeisan(){hideAll(); document.getElementById("seisanArea").classList.remove("hidden");}
+
+function showIdleGame(){ hideAll(); document.getElementById("idleGameArea").classList.remove("hidden"); updateGameUI(); initStageTimer(); }
+
+function login(){ if(document.getElementById("password").value===PASSWORD){ localStorage.setItem("loggedIn","true"); showMenu(); } else alert("暗証番号が違います"); }
+function logout(){ localStorage.setItem("loggedIn","false"); showLogin(); }
 
 /* --- 放置ゲームコアシステム --- */
 function initStageTimer(){
@@ -347,7 +357,6 @@ function updateGameUI(){
  let gColor = gameData.gold >= gameData.targetGold ? "#00e676" : "#ff5252";
  let reqText = `🎯 <b>金額目標</b>: <span style="color:${gColor};">💰 ${gameData.gold} / ${gameData.targetGold} G</span><br><br>🎯 <b>指定アイテム収集</b>:<br>`;
  
- // ★バグ完全修正：要求ターゲット情報の中身（item.id）をITEM_POOLから名前として引き当てて表示！
  gameData.targetItems.forEach(item => {
   let name = ITEM_POOL[item.id]; let has = gameData.bag[name] || 0;
   let iColor = has >= item.qty ? "#00e676" : "#ff5252";
@@ -359,13 +368,14 @@ function updateGameUI(){
  document.getElementById("bagDisplay").innerHTML = bagHTML === "" ? "アイテムはありません" : bagHTML;
 }
 
-function saveGameBackend(){ localStorage.setItem('idle_slime_v5', JSON.stringify(gameData)); }
-function loadGameBackend(){ const saved = localStorage.getItem('idle_slime_v5'); if(saved) { gameData = JSON.parse(saved); } else { generateStageGoal(); } }
+function saveGameBackend(){ localStorage.setItem('idle_slime_v6', JSON.stringify(gameData)); }
+function loadGameBackend(){ const saved = localStorage.getItem('idle_slime_v6'); if(saved) { gameData = JSON.parse(saved); } else { generateStageGoal(); } }
 
 /* --- パチスロ便利ツールシステムロジック --- */
-function hideAll(){ ["loginArea","menuArea","kouryakuArea","hokutoTensei2Area","tekken6Area","hokutoArea","godArea","magirecoArea","unset1Area","tenseiArea","seisanArea","idleGameArea"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");}); }
-function login(){ if(document.getElementById("password").value===PASSWORD){ localStorage.setItem("loggedIn","true"); showMenu(); } else alert("暗証番号が違います"); }
-function logout(){ localStorage.setItem("loggedIn","false"); showLogin(); }
+function showKouryakuPage(name){
+ hideAll(); const map={"北斗転生2":"hokutoTensei2Area","鉄拳6":"tekken6Area","北斗の拳":"hokutoArea","ミリオンゴッド":"godArea","マギアレコード":"magirecoArea"};
+ if(map[name]) document.getElementById(map[name]).classList.remove("hidden"); else document.getElementById("unset1Area").classList.remove("hidden");
+}
 function updateAnimalOptions(){
  const machine = document.getElementById('machine').value; const animalEl = document.getElementById('animal'); if(!machine || !animalEl) return;
  let options=[];

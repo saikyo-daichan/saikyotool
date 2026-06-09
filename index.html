@@ -32,11 +32,16 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 .shop-grid{display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:15px;}
 .shop-item{background:#222;border:1px solid #444;padding:8px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;text-align:left;font-size:0.9rem;}
 .shop-item button{width:auto;margin:0;padding:6px 12px;background:#4caf50;font-size:14px;}
-.bag-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;max-height:120px;overflow-y:auto;background:#111;padding:8px;border-radius:4px;text-align:left;font-size:0.85rem;}
+.bag-grid{display:grid;grid-template-columns:1fr;gap:5px;max-height:180px;overflow-y:auto;background:#111;padding:8px;border-radius:4px;text-align:left;font-size:0.85rem;}
+.bag-row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222;padding:4px 0;}
+.bag-row button{width:auto;margin:0;padding:2px 8px;font-size:11px;background:#ff9800;}
 .target-box{background:#3a2d2d;border:2px solid #ff5252;padding:10px;border-radius:6px;margin-bottom:15px;text-align:left;}
 .gacha-result{font-size:1.2rem;font-weight:bold;color:#ffca28;margin:15px 0;background:#111;padding:10px;border-radius:4px;min-height:40px;line-height:40px;}
 .zukan-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-height:300px;overflow-y:auto;background:#111;padding:10px;border-radius:4px;text-align:left;font-size:0.85rem;}
 .version-tag{font-size:0.85rem;color:#aaa;font-weight:normal;margin-left:5px;}
+.chest-box{background:#4a3b2c;border:2px solid #ffca28;padding:12px;border-radius:6px;margin:10px 0;text-align:center;}
+.chest-btn-group{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px;}
+.chest-btn-group button{margin:0;padding:6px 2px;font-size:12px;background:#8d6e63;}
 </style>
 </head>
 <body>
@@ -136,9 +141,9 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
 
-<!-- 放置ゲーム メインポータルメニュー（★v1.6明記） -->
+<!-- 放置ゲーム メインポータルメニュー（★v1.7刻印） -->
 <div id="idleMenuArea" class="hidden game-container">
- <h2>🎮 放置モンスタークリッカー <span class="version-tag">v1.6</span></h2>
+ <h2>🎮 放置モンスタークリッカー <span class="version-tag">v1.7</span></h2>
  <div class="box" style="padding:20px; margin-bottom:20px;">
   <div class="gold-counter" style="margin-bottom:20px;">💎 所持エメラルド: <span id="menuEmeraldDisplay">0</span> エメ</div>
   <button onclick="showIdlePlaySetup()" style="background-color:#4caf50; font-size:1.2rem; padding:15px; margin-bottom:15px;">⚔️ エリア討伐 [プレイ]</button>
@@ -185,10 +190,24 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
    <span id="stageTitle">STAGE 1</span>
    <span id="monsterName" style="color:#ffca28;">👹 ボス領域</span>
   </div>
-  <div id="monsterFeature" style="font-size:0.85rem; color:#aaa; margin-top:2px;">エリア特性: ショップリreset領域</div>
   <div id="equippedCompanionDisplay" style="font-size:0.85rem; color:#00e676; margin-top:2px; font-weight:bold;">⚔️ 出撃お供: なし</div>
   <div id="companionFeatureInfo" style="font-size:0.8rem; color:#aaa; margin-top:2px; font-style:italic;">特性: ロード中...</div>
   <div id="stageRequirement" style="font-size:0.9rem; margin-top:6px; color:#00e676; border-top:1px dashed #444; padding-top:4px;">目標: 金額＆アイテムロード中...</div>
+ </div>
+
+ <!-- ★救済仕様：選択型宝箱ドロップエリア -->
+ <div id="treasureChestContainer" class="chest-box" style="display:none;">
+  <div style="font-weight:bold; color:#ffca28; font-size:1.1rem; animation: pulse 1s infinite;">🎁 救済の選択宝箱が出現！</div>
+  <div style="font-size:0.8rem; color:#ddd; margin-top:2px;">欲しいアイテムのランクを選択してください：</div>
+  <div class="chest-btn-group">
+   <button onclick="openChestRarity('E')">Eランク</button>
+   <button onclick="openChestRarity('D')">Dランク</button>
+   <button onclick="openChestRarity('C')">Cランク</button>
+   <button onclick="openChestRarity('B')">Bランク</button>
+   <button onclick="openChestRarity('A')">Aランク</button>
+   <button onclick="openChestRarity('S')">Sランク</button>
+   <button onclick="openChestRarity('SS')">SSランク</button>
+  </div>
  </div>
 
  <div class="box" style="margin: 10px 0; padding: 15px;">
@@ -198,13 +217,14 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
   <div id="mimicBonusDisplay" style="font-size:0.8rem; color:#ffca28; margin-top:4px; display:none;">ミミック錬金カウンター: <span id="mimicClicksCount">0</span> / 10000回</div>
  </div>
 
+ <!-- ★追加仕様：いらないアイテムの個別即時売却ショップ機能 -->
  <div class="box" style="padding:10px;">
-  <h4 style="margin:0 0 6px 0; text-align:left; color:#ffca28;">🎒 収集したエリアバッグ (クリアで没収、図鑑には永続登録)</h4>
+  <h4 style="margin:0 0 6px 0; text-align:left; color:#ffca28;">🎒 エリアバッグ ＆ 素材換金取引所</h4>
   <div id="bagDisplay" class="bag-grid">アイテムはありません</div>
  </div>
 
- <button onclick="nextStageCheck()" id="nextStageBtn" style="background-color:#4caf50; display:none; margin-top:5px;">🎉 条件クリア！次のエリアへ進む (+10エメ)</button>
- <button onclick="showIdleMenu()" style="background-color: #555; margin-top:10px;">リタイアして戻る</button>
+ <button onclick="nextStageCheck()" id="nextStageBtn" style="background-color:#4caf50; display:none; margin-top:5px; animation: pulse 1s infinite;">🎉 条件クリア！次のエリアへ進む (+100エメ)</button>
+ <button onclick="showIdleMenu()" style="background-color: #555; margin-top:10px;">エリアを離れてポータルへ戻る</button>
 </div>
 
 <!-- ガチャ画面 -->
@@ -244,6 +264,7 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 const APP_NAME="最強ツール"; const PASSWORD="120708"; const USER_NAME="加藤";
 let resultText=""; let tenseiHistory=[];
 
+// ガチャ仕様データ定義
 const GACHA_POOL = [
  { name: "スライムキング", star: 1, desc: "1.5秒毎に1回 + 10回毎に追加でもう1回叩く" },
  { name: "ゴブリンアーチャー", star: 1, desc: "2.0秒毎に2回叩く" },
@@ -263,6 +284,7 @@ const GACHA_POOL = [
  { name: "神様", star: 4, desc: "7.0秒毎に1回 (5%の確率で追加100回叩く)" }
 ];
 
+// 300種類のアイテムプール
 const ITEM_POOL = {};
 const ZUKAN_MAX = 300;
 const RARITY_LIST = [];
@@ -275,6 +297,9 @@ const wordsA = ["ルビー","サファイア","エメラルド","プラチナリ
 const wordsS = ["ダイヤモンド","ドラゴンの逆鱗","賢者の石の破片","世界樹の若葉","神代の宝剣","星霊のコア","太陽の涙","砂時計","オリハルコン","古代王の証"];
 const wordsSS = ["魔王の心臓","神の涙","オベリスクの核","創世記の破片","終焉の刻印","虚無の天球","不滅の王冠","覇王龍の魂","時空の羅針盤","アヴァロンの聖杯"];
 
+// 売却価格表マッピング
+const SALE_PRICES = { E: 10, D: 30, C: 50, B: 100, A: 300, S: 1000, SS: 5000 };
+
 for(let i=1; i<=ZUKAN_MAX; i++) {
  let r = "E"; let name = "";
  if(i <= 80) { r = "E"; name = wordsE[(i-1)%wordsE.length] + "【E-" + i + "】"; }
@@ -282,7 +307,7 @@ for(let i=1; i<=ZUKAN_MAX; i++) {
  else if(i <= 210) { r = "C"; name = wordsC[(i-151)%wordsC.length] + "【C-" + i + "】"; }
  else if(i <= 250) { r = "B"; name = wordsB[(i-211)%wordsB.length] + "【B-" + i + "】"; }
  else if(i <= 280) { r = "A"; name = wordsA[(i-251)%wordsA.length] + "【A-" + i + "】"; }
- else if(i <= 295) { r = "S"; name = wordsS[(i-281)%wordsS.length] + " " + "【S-" + i + "】"; }
+ else if(i <= 295) { r = "S"; name = wordsS[(i-281)%wordsS.length] + "【S-" + i + "】"; }
  else { r = "SS"; name = wordsSS[(i-296)%wordsSS.length] + "【SS-" + i + "】"; }
  ITEM_POOL[i] = { name: name, rarity: r };
  RARITY_LIST.push({ id: i, rarity: r });
@@ -296,8 +321,9 @@ const MONSTER_SPECS = [
  { name: "👑 不死鳥", icon: "🦅" }
 ];
 
+// ★ご要望：初期支給を「500エメラルド」に変更
 let gameData = {
- gold: 0, emerald: 0, stage: 1, clickLvl: 1, autoPowerLvl: 1, autoSpeedLvl: 1, totalClicks: 0,
+ gold: 0, emerald: 500, stage: 1, clickLvl: 1, autoPowerLvl: 1, autoSpeedLvl: 1, totalClicks: 0,
  bag: {}, targetGold: 100, targetItems: [], costs: { click: 10, auto: 20, speed: 64 },
  companions: ["スライム(初期お供)"], equippedCompanion: "スライム(初期お供)",
  zukan: {}, lastTime: Date.now(), mimicClicks: 0
@@ -344,6 +370,7 @@ function showSeisan(){hideAll(); document.getElementById("seisanArea").classList
 function showKouryaku(){hideAll(); document.getElementById("kouryakuArea").classList.remove("hidden");}
 function showKouryakuPage(p){ hideAll(); if(p==='北斗転生2') document.getElementById("hokutoTensei2Area").classList.remove("hidden"); else if(p==='鉄拳6') document.getElementById("tekken6Area").classList.remove("hidden"); else if(p==='北斗の拳') document.getElementById("hokutoArea").classList.remove("hidden"); else if(p==='ミリオンゴッド') document.getElementById("godArea").classList.remove("hidden"); else if(p==='マギアレコード') document.getElementById("magirecoArea").classList.remove("hidden"); else document.getElementById("unset1Area").classList.remove("hidden"); }
 
+/* --- 放置ポータル制御 --- */
 function showIdleMenu() { hideAll(); document.getElementById("idleMenuArea").classList.remove("hidden"); stopCompanionTimers(); document.getElementById("menuEmeraldDisplay").innerText = gameData.emerald; gameData.lastTime = Date.now(); saveGameBackend(); }
 function showIdlePlaySetup() {
  hideAll(); document.getElementById("idlePlaySetupArea").classList.remove("hidden");
@@ -361,9 +388,10 @@ function updateCompanionSetupInfo(){
  const spec = GACHA_POOL.find(p => p.name === name); info.innerText = spec ? `レア度: ★${spec.star} | 特性: ${spec.desc}` : "未設定";
 }
 
+// ★ご要望：メニューから戻って「プレイ」を押した際、クリア済みの過去ステージはロックされ、現在挑戦中のステージから再開
 function startIdlePlayActual() { 
  hideAll(); document.getElementById("idleGameArea").classList.remove("hidden"); 
- if (!gameData.targetItems || gameData.targetItems.length === 0 || gameData.targetGold <= 50) { generateStageGoal(); }
+ if (!gameData.targetItems || gameData.targetItems.length === 0) { generateStageGoal(); }
  updateGameUI(); initCompanionTimers(); 
 }
 
@@ -375,7 +403,7 @@ function calcOfflineGold() {
  if (diff > 8) {
   let speedFactor = (1000 / Math.max(50, 1000 - (gameData.autoSpeedLvl - 1) * 50));
   let gain = Math.floor(diff * gameData.autoPowerLvl * speedFactor * 0.5);
-  if (gain > 0) { gameData.gold += gain; alert(`【オフライン放置収益】\n離れていた ${diff} 秒の間に、お供が裏画面で 💰 ${gain} G を稼ぎしました！`); saveGameBackend(); }
+  if (gain > 0) { gameData.gold += gain; alert(`【オフライン放置収益】\n離れていた ${diff} 秒の間に、お供が裏画面で 💰 ${gain} G を稼ぎました！`); saveGameBackend(); }
  }
 }
 
@@ -496,31 +524,43 @@ function initCompanionTimers() {
 function stopCompanionTimers() { companionTimers.forEach(t => clearInterval(t)); companionTimers = []; }
 function clickSlime(){ soundTap(); gameData.gold += gameData.clickLvl; trackItemCounter(1); if(gameData.equippedCompanion === "ミミック") { gameData.mimicClicks++; if(gameData.mimicClicks >= 10000) { gameData.emerald += 1; gameData.mimicClicks = 0; } } checkStageGoal(); updateGameUI(); saveGameBackend(); }
 
-// ★ご要望：ステージ進行に完全に比例して「必要叩き回数」と「ドロップ確率」を動的に変化させるロジック
 function getDynamicDropConfig() {
- let stg = gameData.stage;
- let threshold = 30; // ステージ1の初期値
- let chance = 10;
+ let stg = gameData.stage; let threshold = 30; let chance = 10;
  if (stg === 1) { threshold = 30; chance = 10; }
  else if (stg < 10) { threshold = 30 + (stg - 1) * 7; chance = 10 - (stg - 1) * 0.3; }
- else if (stg >= 10 && stg < 500) {
-  let ratio = (stg - 10) / 490;
-  threshold = Math.floor(100 + ratio * 900); // 100回から1000回へインフレ
-  chance = 7 - ratio * 2;                    // 7%から5%へ段階的減少
- } else { threshold = 1000; chance = 5; }
+ else if (stg >= 10 && stg < 500) { let ratio = (stg - 10) / 490; threshold = Math.floor(100 + ratio * 900); chance = 7 - ratio * 2; } 
+ else { threshold = 1000; chance = 5; }
  return { threshold: threshold, chance: chance };
 }
 
 function trackItemCounter(amt) {
- gameData.totalClicks += amt;
- let config = getDynamicDropConfig();
+ gameData.totalClicks += amt; let config = getDynamicDropConfig();
  if (gameData.totalClicks >= config.threshold) {
-  let dropRolls = Math.floor(gameData.totalClicks / config.threshold);
-  gameData.totalClicks %= config.threshold;
+  let dropRolls = Math.floor(gameData.totalClicks / config.threshold); gameData.totalClicks %= config.threshold;
   for(let k=0; k<dropRolls; k++) {
-   if(Math.random() * 100 < config.chance) { executeRarityItemDrop(); }
+   if(Math.random() * 100 < config.chance) {
+    // ★ご要望：アイテムドロップ成功時の一部（15%の確率）で「救済選択宝箱」が目の前に出現！
+    if(Math.random() < 0.15) {
+     playTone(987, 'sine', 0.15); document.getElementById("treasureChestContainer").style.display = "block";
+    } else {
+     executeRarityItemDrop();
+    }
+   }
   }
  }
+}
+
+// ★救済宝箱：クリックされた指定ランクから、300種類の中の対応素材を100%安全に一本釣り
+function openChestRarity(rarity) {
+ playTone(1174, 'sine', 0.2);
+ let matchedPool = RARITY_LIST.filter(x => x.rarity === rarity);
+ let rolledItemObj = matchedPool[Math.floor(Math.random() * matchedPool.length)];
+ let finalItem = ITEM_POOL[rolledItemObj.id];
+ 
+ gameData.bag[finalItem.name] = (gameData.bag[finalItem.name] || 0) + 1;
+ gameData.zukan[finalItem.name] = true;
+ document.getElementById("treasureChestContainer").style.display = "none"; // 閉じる
+ checkStageGoal(); updateGameUI(); saveGameBackend();
 }
 
 function executeRarityItemDrop() {
@@ -541,45 +581,44 @@ function executeRarityItemDrop() {
  gameData.zukan[finalItem.name] = true;
 }
 
-// ★ご要望：ステージが低いうちはEランクアイテム限定、進むにつれてD, Cと要求をステップアップ！
+// ★ご要望：いらない素材を売却（E:10G〜SS:5000G）
+function sellItemActual(itemName) {
+ if(!gameData.bag[itemName] || gameData.bag[itemName] <= 0) return;
+ // アイテムのオブジェクトからレア度を取得
+ let itemId = Object.keys(ITEM_POOL).find(k => ITEM_POOL[k].name === itemName);
+ if(!itemId) return;
+ let rarity = ITEM_POOL[itemId].rarity;
+ let price = SALE_PRICES[rarity] || 10;
+ 
+ gameData.bag[itemName]--;
+ gameData.gold += price;
+ if(gameData.bag[itemName] <= 0) delete gameData.bag[itemName];
+ soundTap(); checkStageGoal(); updateGameUI(); saveGameBackend();
+}
+
 function generateStageGoal() {
  let stg = gameData.stage; isGoalAlerted = false;
  gameData.targetGold = stg * 250; gameData.targetItems = [];
- 
  let reqTypesCount = Math.min(6, 1 + Math.floor(stg / 4));
  let reqQty = Math.min(5, 1 + Math.floor(stg / 7));
  let selectedIDs = [];
  
  while(selectedIDs.length < reqTypesCount) {
   let allowedPool = [];
-  if (stg <= 3) {
-   // ステージ1〜3は完全にEランク（ID 1〜80）から指定
-   allowedPool = RARITY_LIST.filter(x => x.rarity === "E");
-  } else if (stg <= 9) {
-   // ステージ4〜9はE・Dランクから指定
-   allowedPool = RARITY_LIST.filter(x => ["E", "D"].includes(x.rarity));
-  } else if (stg <= 15) {
-   // ステージ10〜15はE・D・Cランクから指定
-   allowedPool = RARITY_LIST.filter(x => ["E", "D", "C"].includes(x.rarity));
-  } else if (stg <= 19) {
-   // ステージ16〜19はAランクまで解放
-   allowedPool = RARITY_LIST.filter(x => ["E", "D", "C", "B", "A"].includes(x.rarity));
-  } else {
-   // ステージ20以降は全ランク（S、SS含む）から無制限に鬼難易度指定！
-   allowedPool = RARITY_LIST;
-  }
+  if (stg <= 3) { allowedPool = RARITY_LIST.filter(x => x.rarity === "E"); } 
+  else if (stg <= 9) { allowedPool = RARITY_LIST.filter(x => ["E", "D"].includes(x.rarity)); } 
+  else if (stg <= 15) { allowedPool = RARITY_LIST.filter(x => ["E", "D", "C"].includes(x.rarity)); } 
+  else if (stg <= 19) { allowedPool = RARITY_LIST.filter(x => ["E", "D", "C", "B", "A"].includes(x.rarity)); } 
+  else { allowedPool = RARITY_LIST; }
   
   let chosenMeta = allowedPool[Math.floor(Math.random() * allowedPool.length)];
-  if(!selectedIDs.includes(chosenMeta.id)) {
-   selectedIDs.push(chosenMeta.id); gameData.targetItems.push({ id: chosenMeta.id, qty: reqQty });
-  }
+  if(!selectedIDs.includes(chosenMeta.id)) { selectedIDs.push(chosenMeta.id); gameData.targetItems.push({ id: chosenMeta.id, qty: reqQty }); }
  }
 }
 
 function checkStageGoal(){
  const nextBtn = document.getElementById("nextStageBtn");
- let goldOk = (gameData.gold >= gameData.targetGold);
- let itemsOk = true;
+ let goldOk = (gameData.gold >= gameData.targetGold); let itemsOk = true;
  if (!gameData.targetItems || gameData.targetItems.length === 0) return;
  gameData.targetItems.forEach(item => {
   let name = ITEM_POOL[item.id].name; if((gameData.bag[name] || 0) < item.qty) itemsOk = false;
@@ -588,12 +627,14 @@ function checkStageGoal(){
  else { nextBtn.style.display = "none"; }
 }
 
+// ★ご要望：ステージ突破時の報酬を「100エメラルド」に超引き上げ！
 function nextStageCheck(){
- gameData.stage++; gameData.emerald += 10;
+ gameData.stage++; gameData.emerald += 100; // 100エメ支給
  gameData.gold = 0; gameData.bag = {}; gameData.totalClicks = 0; gameData.mimicClicks = 0;
  gameData.clickLvl = 1; gameData.autoPowerLvl = 1; gameData.autoSpeedLvl = 1;
  gameData.costs = { click: 10, auto: 20, speed: 64 };
  document.getElementById("nextStageBtn").style.display = "none";
+ document.getElementById("treasureChestContainer").style.display = "none";
  generateStageGoal(); updateGameUI(); stopCompanionTimers(); initCompanionTimers(); saveGameBackend();
 }
 
@@ -613,7 +654,6 @@ function updateGameUI(){
  document.getElementById("equippedCompanionDisplay").innerText = `⚔️ 出撃お供: ${currentCompName}`;
  document.getElementById("slimeBtn").innerText = spec.icon;
  
- // カウンターと確率表示を動的テキストに更新
  let dropConfig = getDynamicDropConfig();
  document.getElementById("totalClicksCount").innerText = gameData.totalClicks;
  document.getElementById("targetClickThreshold").innerText = dropConfig.threshold;
@@ -662,22 +702,28 @@ function updateGameUI(){
  }
  document.getElementById("stageRequirement").innerHTML = reqText;
 
- let bagHTML = ""; for(let key in gameData.bag) { bagHTML += `<div>📦 ${key} x ${gameData.bag[key]}</div>`; }
+ // ★売却ボタン付き素材リストUIの動的描画
+ let bagHTML = ""; 
+ for(let key in gameData.bag) { 
+  if(gameData.bag[key] > 0) {
+   bagHTML += `<div class="bag-row"><div>📦 ${key} x ${gameData.bag[key]}</div><button onclick="sellItemActual('${key}')">売却する</button></div>`; 
+  }
+ }
  document.getElementById("bagDisplay").innerHTML = bagHTML === "" ? "アイテムはありません" : bagHTML;
 }
 
 function copyText(e){ e.preventDefault(); initAudio(); const txt=document.getElementById("output").textContent; navigator.clipboard.writeText(txt).then(()=>{alert("精算データをコピーしました！");}); }
-function copyTensei(e){ e.preventDefault(); initAudio(); const txt=document.getElementById("tenseiOutput").textContent; navigator.clipboard.writeText(txt).then(()=>{alert("台データをコピーしました！\nそのまま貼り付けられます。");}); }
+function copyTensei(e){ e.preventDefault(); initAudio(); const txt=document.getElementById("tenseiOutput").textContent; navigator.clipboard.writeText(txt).then(()=>{alert("台データをコピーしました！");}); }
 
-function saveGameBackend(){ gameData.lastTime = Date.now(); localStorage.setItem('idle_slime_v16_save', JSON.stringify(gameData)); }
+function saveGameBackend(){ gameData.lastTime = Date.now(); localStorage.setItem('idle_slime_v17_save', JSON.stringify(gameData)); }
 function loadGameBackend() { 
- const saved = localStorage.getItem('idle_slime_v16_save'); if(saved) { gameData = JSON.parse(saved); }
+ const saved = localStorage.getItem('idle_slime_v17_save'); if(saved) { gameData = JSON.parse(saved); }
  if (!gameData.equippedCompanion) gameData.equippedCompanion = "スライム(初期お供)";
  if (!gameData.companions || gameData.companions.length === 0) gameData.companions = ["スライム(初期お供)"];
  if (!gameData.targetItems || gameData.targetItems.length === 0) { generateStageGoal(); }
 }
 
-/* --- パチスロツールシステム共通ロジック群 --- */
+/* --- パチスロツール共通システムロジック --- */
 function updateAnimalOptions(){
  const machine = document.getElementById('machine').value; const animalEl = document.getElementById('animal'); if(!machine || !animalEl) return;
  let options=[];
@@ -776,17 +822,6 @@ ${hitSection}${spinFooterSection}
 店名${storeV}
 台番${daiBanV}
 名前${USER_NAME}`;
-}
-
-function calculate(){
- const sd = document.getElementById("seed"), sl = document.getElementById("salary");
- const iv = document.getElementById("investment"), ch = document.getElementById("cash"), op = document.getElementById("output");
- if(!sd || !sl || !iv || !ch || !op) return;
- const seedV=sd.value===""?"":Number(sd.value).toLocaleString(); const salaryV=sl.value===""?"":Number(sl.value).toLocaleString();
- const investV=iv.value===""?"":Number(iv.value).toLocaleString(); const cashV=ch.value===""?"":Number(ch.value).toLocaleString();
- let nextV = ""; if(sd.value!=="" || ch.value!=="" || sl.value!=="" || iv.value!=="") { nextV = (Number(sd.value||0)+Number(ch.value||0)-Number(sl.value||0)-Number(iv.value||0)).toLocaleString(); }
- const d=new Date(), w=["日","月","火","水","木","金","土"];
- resultText=`${d.getMonth()+1}/${d.getDate()}(${w[d.getDay()]})${USER_NAME}\n種銭${seedV}\n日当${salaryV}\n投資${investV}\n換金${cashV}\n次回${nextV}`; op.textContent=resultText;
 }
 </script>
 </body>

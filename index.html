@@ -39,21 +39,17 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 .gacha-result{font-size:1.2rem;font-weight:bold;color:#ffca28;margin:15px 0;background:#111;padding:10px;border-radius:4px;min-height:40px;line-height:40px;}
 .zukan-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-height:300px;overflow-y:auto;background:#111;padding:10px;border-radius:4px;text-align:left;font-size:0.85rem;}
 .version-tag{font-size:0.85rem;color:#aaa;font-weight:normal;margin-left:5px;}
-.chest-box{background:#4a3b2c;border:2px solid #ffca28;padding:12px;border-radius:6px;margin:10px 0;text-align:center;}
-.chest-btn-group{display:flex;justify-content:center;gap:6px;margin-top:8px;flex-wrap:wrap;}
-.chest-btn-group button{margin:0;padding:6px 12px;font-size:12px;background:#8d6e63;width:auto;}
+.chest-box{background:#4a3b2c;border:2px solid #ffca28;padding:15px;border-radius:6px;margin:10px 0;text-align:center;}
 </style>
 </head>
 <body>
 
-<!-- ログインエリア -->
 <div id="loginArea">
  <h2 class="appTitle">暗証番号入力</h2>
  <input id="password" type="password" placeholder="暗証番号">
  <button onclick="login()">ログイン</button>
 </div>
 
-<!-- メニューエリア -->
 <div id="menuArea" class="hidden">
  <h2 class="appTitle">メニュー</h2>
  <div class="nav-grid">
@@ -65,7 +61,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="logout()" style="background-color: #555; margin-top:20px;">ログアウト</button>
 </div>
 
-<!-- 攻略情報エリア -->
 <div id="kouryakuArea" class="hidden">
  <h2>攻略情報</h2>
  <div class="grid3">
@@ -86,7 +81,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 <div id="magirecoArea" class="hidden"><h2>マギアレコード</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 <div id="unset1Area" class="hidden"><h2>未設定</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 
-<!-- 台データ作成エリア -->
 <div id="tenseiArea" class="hidden">
  <h2>データ作成</h2>
  <button onclick="resetAllTenseiFields()" class="btn-reset">⚠️ 入力内容と履歴をすべて消去（リセット）</button>
@@ -131,7 +125,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
 
-<!-- 精算エリア -->
 <div id="seisanArea" class="hidden">
  <h2>精算</h2>
  <input id="seed" type="number" placeholder="種銭"><input id="salary" type="number" placeholder="日当"><input id="investment" type="number" placeholder="投資"><input id="cash" type="number" placeholder="換金">
@@ -141,9 +134,8 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
 
-<!-- 放置ゲーム メインポータルメニュー -->
 <div id="idleMenuArea" class="hidden game-container">
- <h2>🎮 放置モンスタークリッカー <span class="version-tag">v1.9</span></h2>
+ <h2>🎮 放置モンスタークリッカー <span class="version-tag">v2.0</span></h2>
  <div class="box" style="padding:20px; margin-bottom:20px;">
   <div class="gold-counter" style="margin-bottom:20px;">💎 所持エメラルド: <span id="menuEmeraldDisplay">0</span> エメ</div>
   <button onclick="showIdlePlaySetup()" style="background-color:#4caf50; font-size:1.2rem; padding:15px; margin-bottom:15px;">⚔️ エリア討伐 [プレイ]</button>
@@ -153,7 +145,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showMenu()" style="background-color: #555;">ツールメニューに戻る</button>
 </div>
 
-<!-- お供選択＆出撃画面 -->
 <div id="idlePlaySetupArea" class="hidden game-container">
  <h2>⚔️ 出撃お供編成</h2>
  <div class="box" style="padding:20px; text-align:left;">
@@ -165,7 +156,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showIdleMenu()" style="background-color: #555; margin-top:10px;">戻る</button>
 </div>
 
-<!-- 放置ゲーム プレイ中メインエリア -->
 <div id="idleGameArea" class="hidden game-container">
  <div class="box" style="padding: 6px;">
   <h3 style="margin:4px 0; color:#00e676; font-size:1.0rem;">🛒 エリア限定ショップ (クリア毎にリセット)</h3>
@@ -195,11 +185,10 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
   <div id="stageRequirement" style="font-size:0.9rem; margin-top:6px; color:#00e676; border-top:1px dashed #444; padding-top:4px;">目標: 金額＆アイテムロード中...</div>
  </div>
 
- <!-- ★進化仕様：ランク別の選択宝箱ドロップエリア -->
  <div id="treasureChestContainer" class="chest-box" style="display:none;">
   <div id="chestTitleText" style="font-weight:bold; font-size:1.1rem; text-shadow: 0 0 5px #000;">🎁 宝箱が出現！</div>
-  <div style="font-size:0.8rem; color:#ddd; margin-top:2px;">中から取り出すアイテムのレア度を選択してください：</div>
-  <div id="chestBtnGroupArea" class="chest-btn-group"></div>
+  <div id="chestDescriptionText" style="font-size:0.85rem; color:#ddd; margin-top:4px;"></div>
+  <button id="chestOpenBtnAction" onclick="openChestMultipleRandom()" style="background-color:#ff9800; margin-top:10px; padding:10px; width:100%; font-size:1.1rem;">🎉 宝箱を開ける（ジャラジャラ中身獲得）</button>
  </div>
 
  <div class="box" style="margin: 10px 0; padding: 15px;">
@@ -214,11 +203,10 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
   <div id="bagDisplay" class="bag-grid">アイテムはありません</div>
  </div>
 
- <button onclick="nextStageCheck()" id="nextStageBtn" style="background-color:#4caf50; display:none; margin-top:5px;">🎉 条件クリア！次のエリアへ進む (+100エメ)</button>
+ <button onclick="nextStageCheck()" id="nextStageBtn" style="background-color:#4caf50; display:none; margin-top:5px; animation: pulse 1s infinite;">🎉 条件クリア！次のエリアへ進む (+100エメ)</button>
  <button onclick="showIdleMenu()" style="background-color: #555; margin-top:10px;">エリアを離れてポータルへ戻る</button>
 </div>
 
-<!-- ガチャ画面 -->
 <div id="idleGachaArea" class="hidden game-container">
  <h2>🔮 お供召喚ガチャ</h2>
  <div class="box" style="padding:20px;">
@@ -239,7 +227,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showIdleMenu()" style="background-color: #555; margin-top:10px;">戻る</button>
 </div>
 
-<!-- 永続図鑑画面 -->
 <div id="idleZukanArea" class="hidden game-container">
  <h2>📖 ドロップ収集図鑑</h2>
  <div class="box" style="text-align:left; padding:8px; margin-bottom:10px;">
@@ -316,6 +303,9 @@ let gameData = {
  zukan: {}, lastTime: Date.now(), mimicClicks: 0
 };
 
+// 宝箱内部の一時記録用
+let activeChestType = ""; 
+
 let companionTimers = [];
 let skCount = 0;
 let isGoalAlerted = false;
@@ -383,7 +373,6 @@ function startIdlePlayActual() {
 function showIdleGacha() { hideAll(); document.getElementById("idleGachaArea").classList.remove("hidden"); document.getElementById("gachaEmeraldDisplay").innerText = gameData.emerald; document.getElementById("gachaResultDisplay").innerText = "レバー引け！"; }
 function showIdleZukan() { hideAll(); document.getElementById("idleZukanArea").classList.remove("hidden"); renderZukanHTML(); }
 
-// ★ご要望：オフライン放置中に宝箱以外のアイテムドロップを計算（確率50%低下）＆バンッと獲得一覧表示
 function calcOfflineGold() {
  let now = Date.now(); let diff = Math.floor((now - gameData.lastTime) / 1000);
  if (diff > 8) {
@@ -392,7 +381,6 @@ function calcOfflineGold() {
   let totalAttacks = Math.floor((diff * 1000) / adjustedInterval);
   if(totalAttacks < 0 || isNaN(totalAttacks)) totalAttacks = 0;
   
-  // ゴールド蓄積(50%)
   let bonusPower = gameData.autoPowerLvl - 1;
   let singlePower = 1 + bonusPower;
   if(gameData.equippedCompanion === "ゴブリンアーチャー" || gameData.equippedCompanion === "ゴーレム") singlePower = 2 + bonusPower * 2;
@@ -401,10 +389,9 @@ function calcOfflineGold() {
   let offlineGold = Math.floor(totalAttacks * singlePower * 0.5);
   gameData.gold += offlineGold;
 
-  // アイテム放置ドロップ（確率50%補正）
   let config = getDynamicDropConfig();
   let totalRolls = Math.floor(totalAttacks / config.threshold);
-  let offlineChance = config.chance * 0.5; // 確率を50%ダウン
+  let offlineChance = config.chance * 0.5;
   
   let offlineObtained = {};
   for (let i = 0; i < totalRolls; i++) {
@@ -416,7 +403,6 @@ function calcOfflineGold() {
    }
   }
 
-  // ★「バンッ！」と獲得一覧表示ダイアログ
   let report = `【お帰りなさいボーナス】\n離れていた ${diff} 秒の間に、お供たちが裏画面で戦ってくれました！\n\n💰 獲得資金: +${offlineGold} G\n📦 放置ドロップ素材一覧:`;
   let keys = Object.keys(offlineObtained);
   if(keys.length === 0) { report += "\n・アイテムドロップはありませんでした。"; }
@@ -528,7 +514,6 @@ function trackItemCounter(amt) {
   let dropRolls = Math.floor(gameData.totalClicks / config.threshold); gameData.totalClicks %= config.threshold;
   for(let k=0; k<dropRolls; k++) {
    if(Math.random() * 100 < config.chance) {
-    // 宝箱獲得判定 (15%の確率)
     if(Math.random() < 0.15) { rollChestRaritySpec(); } 
     else { executeRarityItemDrop(); }
    }
@@ -536,38 +521,62 @@ function trackItemCounter(amt) {
  }
 }
 
-// ★ご要望：宝箱ドロップ時に4階級スペックへ100%振り分け
 function rollChestRaritySpec() {
  playTone(987, 'sine', 0.15);
  let rRoll = Math.random() * 100;
- let title = ""; let bg = ""; let btns = [];
+ let title = ""; let bg = ""; let desc = "";
  
- if (rRoll < 1.5) { // 虹の宝箱 1.5%
-  title = "🌈 虹の宝箱 [S〜SS] が出現！"; bg = "#311b92"; btns = ["S", "SS"];
- } else if (rRoll < 8.0) { // 金の宝箱 6.5% (1.5 + 6.5 = 8.0)
-  title = "🟨 金の宝箱 [B〜S] が出現！"; bg = "#ffd600"; bg = "#5d4037"; title = "🟨 金の宝箱 [B〜S] が出現！"; bg = "#ffab00"; btns = ["B", "A", "S"];
- } else if (rRoll < 40.0) { // 銀の宝箱 32% (8.0 + 32.0 = 40.0)
-  title = "⬜ 銀の宝箱 [C〜A] が出現！"; bg = "#cfd8dc"; btns = ["C", "B", "A"];
- } else { // 銅の宝箱 60%
-  title = "🟫 銅の宝箱 [E〜B] が出現！"; bg = "#5d4037"; btns = ["E", "D", "C", "B"];
+ if (rRoll < 1.5) { 
+  activeChestType = "RAINBOW"; title = "🌈 虹の宝箱 が出現！"; bg = "#311b92"; desc = "中身スペック: [SS〜Aランク] の中からランダムに 1〜3種類 飛び出す！";
+ } else if (rRoll < 8.0) { 
+  activeChestType = "GOLD"; title = "🟨 金の宝箱 が出現！"; bg = "#ffab00"; desc = "中身スペック: [A〜Cランク] の中からランダムに 1〜4種類 飛び出す！";
+ } else if (rRoll < 40.0) { 
+  activeChestType = "SILVER"; title = "⬜ 銀の宝箱 が出現！"; bg = "#cfd8dc"; desc = "中身スペック: [B〜Dランク] の中からランダムに 2〜5種類 飛び出す！";
+ } else { 
+  activeChestType = "BRONZE"; title = "🟫 銅の宝箱 が出現！"; bg = "#5d4037"; desc = "中身スペック: [C〜Eランク] の中からランダムに 2〜6種類 飛び出す！";
  }
  
  document.getElementById("chestTitleText").innerText = title;
+ document.getElementById("chestDescriptionText").innerText = desc;
  const container = document.getElementById("treasureChestContainer");
  container.style.backgroundColor = bg;
  container.style.display = "block";
- 
- const btnGroup = document.getElementById("chestBtnGroupArea");
- btnGroup.innerHTML = btns.map(b => `<button onclick="openChestRarity('${b}')">${b}ランク</button>`).join("");
 }
 
-function openChestRarity(rarity) {
+// ★ご要望：選ぶんじゃなくて各ランク範囲からランダムに複数種類(数個ずつ)ジャラッと一括獲得！
+function openChestMultipleRandom() {
  playTone(1174, 'sine', 0.2);
- let matchedPool = RARITY_LIST.filter(x => x.rarity === rarity);
- let rolledItemObj = matchedPool[Math.floor(Math.random() * matchedPool.length)];
- let finalItem = ITEM_POOL[rolledItemObj.id];
- gameData.bag[finalItem.name] = (gameData.bag[finalItem.name] || 0) + 1; gameData.zukan[finalItem.name] = true;
- document.getElementById("treasureChestContainer").style.display = "none"; checkStageGoal(); updateGameUI(); saveGameBackend();
+ let allowedRarities = [];
+ let minTypes = 1; let maxTypes = 3;
+ 
+ if (activeChestType === "BRONZE") { allowedRarities = ["C", "D", "E"]; minTypes = 2; maxTypes = 6; } 
+ else if (activeChestType === "SILVER") { allowedRarities = ["B", "C", "D"]; minTypes = 2; maxTypes = 5; } 
+ else if (activeChestType === "GOLD") { allowedRarities = ["A", "B", "C"]; minTypes = 1; maxTypes = 4; } 
+ else if (activeChestType === "RAINBOW") { allowedRarities = ["SS", "S", "A"]; minTypes = 1; maxTypes = 3; }
+
+ // 要求条件に沿う対象アイテムのIDをプール化
+ let subPool = RARITY_LIST.filter(x => allowedRarities.includes(x.rarity));
+ let rolledTypesCount = Math.floor(Math.random() * (maxTypes - minTypes + 1)) + minTypes;
+ 
+ let reportList = [];
+ let chosenIds = [];
+
+ while(chosenIds.length < Math.min(rolledTypesCount, subPool.length)) {
+  let meta = subPool[Math.floor(Math.random() * subPool.length)];
+  if(!chosenIds.includes(meta.id)) {
+   chosenIds.push(meta.id);
+   let finalItem = ITEM_POOL[meta.id];
+   // 各種類ごとに1〜3個の個数をジャラッとランダム獲得
+   let qty = Math.floor(Math.random() * 3) + 1;
+   gameData.bag[finalItem.name] = (gameData.bag[finalItem.name] || 0) + qty;
+   gameData.zukan[finalItem.name] = true;
+   reportList.push(`・[${finalItem.rarity}] ${finalItem.name} x ${qty}個`);
+  }
+ }
+
+ alert(`🎁 宝箱を開放しました！\n中から以下の素材がジャラジャラッと飛び出した！\n\n${reportList.join("\n")}`);
+ document.getElementById("treasureChestContainer").style.display = "none";
+ checkStageGoal(); updateGameUI(); saveGameBackend();
 }
 
 function selectRarityItemDroppedOnly() {
@@ -694,7 +703,7 @@ function loadGameBackend() {
  if (!gameData.targetItems || gameData.targetItems.length === 0) { generateStageGoal(); }
 }
 
-/* --- パチスロシステム共通ロジック --- */
+/* --- パチスロツール共通ロジック --- */
 function updateAnimalOptions(){
  const machine = document.getElementById('machine').value; const animalEl = document.getElementById('animal'); if(!machine || !animalEl) return;
  let options=[]; if(machine==='北斗転生') options=['イノシシ','ウリ坊']; else if(machine==='鉄拳') options=['リセ','AT間天井狙い']; else if(machine==='北斗') options=['リセ','差枚']; else if(machine==='ミリオンゴッド') options=['AT間連荘狙い','前回VVV揃い後','前回Z-ZONE後','前回赤7揃い後','前回天井到達後','前回GOD揃い後','前回5連以上後','前々回赤7揃い後','前々回Z-ZONE後','前々回VVV揃い後']; else if(machine==='マギアレコード') options=['AT間天井狙い'];

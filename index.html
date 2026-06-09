@@ -33,7 +33,7 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 .shop-item{background:#222;border:1px solid #444;padding:8px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;text-align:left;font-size:0.9rem;}
 .shop-item button{width:auto;margin:0;padding:6px 12px;background:#4caf50;font-size:14px;}
 .bag-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;max-height:120px;overflow-y:auto;background:#111;padding:8px;border-radius:4px;text-align:left;font-size:0.85rem;}
-.target-box{background:#3a2d2d;border:2px solid #ff5252;padding:10px;border-radius:6px;margin-bottom:15px;text-align:left;}
+.target-box{background:#3a2d2d;border:1px solid #ff5252;padding:10px;border-radius:6px;margin-bottom:15px;text-align:left;}
 .gacha-result{font-size:1.2rem;font-weight:bold;color:#ffca28;margin:15px 0;background:#111;padding:10px;border-radius:4px;min-height:40px;line-height:40px;}
 .zukan-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-height:300px;overflow-y:auto;background:#111;padding:10px;border-radius:4px;text-align:left;font-size:0.85rem;}
 .version-tag{font-size:0.85rem;color:#aaa;font-weight:normal;margin-left:5px;}
@@ -41,14 +41,12 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 </head>
 <body>
 
-<!-- ログインエリア -->
 <div id="loginArea">
  <h2 class="appTitle">暗証番号入力</h2>
  <input id="password" type="password" placeholder="暗証番号">
  <button onclick="login()">ログイン</button>
 </div>
 
-<!-- メニューエリア -->
 <div id="menuArea" class="hidden">
  <h2 class="appTitle">メニュー</h2>
  <div class="nav-grid">
@@ -60,7 +58,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="logout()" style="background-color: #555; margin-top:20px;">ログアウト</button>
 </div>
 
-<!-- 攻略情報エリア -->
 <div id="kouryakuArea" class="hidden">
  <h2>攻略情報</h2>
  <div class="grid3">
@@ -81,7 +78,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 <div id="magirecoArea" class="hidden"><h2>マギアレコード</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 <div id="unset1Area" class="hidden"><h2>未設定</h2><div class="box"><p>未設定</p></div><button onclick="showKouryaku()">戻る</button></div>
 
-<!-- 台データ作成エリア -->
 <div id="tenseiArea" class="hidden">
  <h2>データ作成</h2>
  <button onclick="resetAllTenseiFields()" class="btn-reset">⚠️ 入力内容と履歴をすべて消去（リセット）</button>
@@ -126,7 +122,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
 
-<!-- 精算エリア -->
 <div id="seisanArea" class="hidden">
  <h2>精算</h2>
  <input id="seed" type="number" placeholder="種銭"><input id="salary" type="number" placeholder="日当"><input id="investment" type="number" placeholder="投資"><input id="cash" type="number" placeholder="換金">
@@ -136,7 +131,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
 
-<!-- 放置ゲーム メインポータルメニュー（★v1.2をバシッと明記） -->
 <div id="idleMenuArea" class="hidden game-container">
  <h2>🎮 放置モンスタークリッカー <span class="version-tag">v1.2</span></h2>
  <div class="box" style="padding:20px; margin-bottom:20px;">
@@ -148,7 +142,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showMenu()" style="background-color: #555;">ツールメニューに戻る</button>
 </div>
 
-<!-- お供選択＆出撃画面 -->
 <div id="idlePlaySetupArea" class="hidden game-container">
  <h2>⚔️ 出撃お供編成</h2>
  <div class="box" style="padding:20px; text-align:left;">
@@ -160,7 +153,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showIdleMenu()" style="background-color: #555; margin-top:10px;">戻る</button>
 </div>
 
-<!-- 放置ゲーム プレイ中メインエリア -->
 <div id="idleGameArea" class="hidden game-container">
  <div class="box" style="padding: 6px;">
   <h3 style="margin:4px 0; color:#00e676; font-size:1.0rem;">🛒 エリア限定ショップ (クリア毎にリセット)</h3>
@@ -206,7 +198,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showIdleMenu()" style="background-color: #555; margin-top:10px;">リタイアして戻る</button>
 </div>
 
-<!-- ガチャ画面 -->
 <div id="idleGachaArea" class="hidden game-container">
  <h2>🔮 お供召喚ガチャ</h2>
  <div class="box" style="padding:20px;">
@@ -227,7 +218,6 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showIdleMenu()" style="background-color: #555; margin-top:10px;">戻る</button>
 </div>
 
-<!-- 永続図鑑画面 -->
 <div id="idleZukanArea" class="hidden game-container">
  <h2>📖 ドロップ収集図鑑</h2>
  <div class="box" style="text-align:left; padding:8px; margin-bottom:10px;">
@@ -283,7 +273,7 @@ for(let i=1; i<=ZUKAN_MAX; i++) {
  else if(i <= 210) { r = "C"; name = wordsC[(i-151)%wordsC.length] + `【C-${i}】`; }
  else if(i <= 250) { r = "B"; name = wordsB[(i-211)%wordsB.length] + `【B-${i}】`; }
  else if(i <= 280) { r = "A"; name = wordsA[(i-251)%wordsA.length] + `【A-${i}】`; }
- else if(i <= 295) { r = "S"; name = wordsS[(i-281)%wordsS.length] + ` =wordsS[(i-281)%wordsS.length] + 【S-${i}】`; name = wordsS[(i-281)%wordsS.length] + `【S-${i}】`; }
+ else if(i <= 295) { r = "S"; name = wordsS[(i-281)%wordsS.length] + `【S-${i}】`; } // ★無限ループバグを完全駆除修正！
  else { r = "SS"; name = wordsSS[(i-296)%wordsSS.length] + `【SS-${i}】`; }
  ITEM_POOL[i] = { name: name, rarity: r };
  RARITY_LIST.push({ id: i, rarity: r });
@@ -297,7 +287,6 @@ const MONSTER_SPECS = [
  { name: "👑 不死鳥", icon: "🦅" }
 ];
 
-// ★初期お供の表記を「スライム(初期お供)」に完全一元化
 let gameData = {
  gold: 0, emerald: 0, stage: 1, clickLvl: 1, autoPowerLvl: 1, autoSpeedLvl: 1, totalClicks: 0,
  bag: {}, targetGold: 100, targetItems: [], costs: { click: 10, auto: 20, speed: 64 },
@@ -360,7 +349,6 @@ function updateCompanionSetupInfo(){
  const spec = GACHA_POOL.find(p => p.name === name); info.innerText = spec ? `レア度: ★${spec.star} | 特性: ${spec.desc}` : "未設定";
 }
 
-// ★バグ完全修正：プレイ開始時に条件が未生成の場合や同期ズレを完全に防ぐ
 function startIdlePlayActual() { 
  hideAll(); document.getElementById("idleGameArea").classList.remove("hidden"); 
  if (!gameData.targetItems || gameData.targetItems.length === 0 || gameData.targetGold <= 100) { generateStageGoal(); }
@@ -375,7 +363,7 @@ function calcOfflineGold() {
  if (diff > 8) {
   let speedFactor = (1000 / Math.max(50, 1000 - (gameData.autoSpeedLvl - 1) * 50));
   let gain = Math.floor(diff * gameData.autoPowerLvl * speedFactor * 0.5);
-  if (gain > 0) { gameData.gold += gain; alert(`【オフライン放置収益】\n離れていた ${diff} 秒の間に、お供が裏画面で 💰 ${gain} G を稼ぎました！`); saveGameBackend(); }
+  if (gain > 0) { gameData.gold += gain; alert(`【オフライン放置収益】\n離れていた ${diff} 秒の間に、お供が 💰 ${gain} G を稼ぎました！`); saveGameBackend(); }
  }
 }
 
@@ -412,7 +400,7 @@ function renderZukanHTML() {
  document.getElementById("zukanListDisplay").innerHTML = html;
 }
 
-/* --- お供自動攻撃ロジック（ガチバグ修正版） --- */
+/* --- お供自動攻撃ロジック --- */
 function initCompanionTimers() {
  stopCompanionTimers(); skCount = 0; dgCount = 0;
  const compName = gameData.equippedCompanion ? gameData.equippedCompanion : "スライム(初期お供)";
@@ -420,7 +408,6 @@ function initCompanionTimers() {
  let baseSpeedLvl = gameData.autoSpeedLvl;
  let bonusPower = gameData.autoPowerLvl - 1;
 
- // ★バグ完全修正：「スライム(初期お供)」の文字列の完全一致による稼働保証
  if(compName === "スライム(初期お供)") {
   let interval = Math.max(50, 1000 - (baseSpeedLvl - 1) * 50);
   let t = setInterval(()=>{ gameData.gold += (1 + bonusPower); trackItemCounter(1); checkStageGoal(); updateGameUI(); }, interval);
@@ -579,7 +566,7 @@ function updateGameUI(){
  let specIdx = (gameData.stage - 1) % MONSTER_SPECS.length;
  let spec = MONSTER_SPECS[specIdx];
  document.getElementById("monsterName").innerText = `⚔️ ${spec.name} の領域`;
- document.getElementById("monsterFeature").innerText = `エリア特性: ショップリセット領域`;
+ document.getElementById("monsterFeature").innerText = `エリア特性: ショップリreset領域`;
  
  const currentCompName = gameData.equippedCompanion ? gameData.equippedCompanion : "スライム(初期お供)";
  document.getElementById("equippedCompanionDisplay").innerText = `⚔️ 出撃お供: ${currentCompName}`;
@@ -690,7 +677,7 @@ function updateTenseiPreview(){
  if (machine === 'マギアレコード') { customTitle = `(まどマギ AT間天井狙い${machineNoVal})`; headerBBAT = "(1:RB 2:BB 3:AT)"; if (expVal !== "") expect = `等価期待値${expVal}`; }
  if (machine === 'ミリオンゴッド') { headerBBAT = "(1:初当 2:連荘)"; if (animal === 'AT間連荘狙い') { if (expVal !== "") expect = `等価期待値${expVal}`; } else if (animal === '前回VVV揃い後') machineRate = "機械割#130"; else if (['前回Z-ZONE後', '前回赤7揃い後', '前回天井到達後'].includes(animal)) machineRate = "機械割#102"; else if (['開GOD揃い後', '前回5連以上後', '前々回赤7揃い後', '前々回Z-ZONE後', '前々回VVV揃い後'].includes(animal)) machineRate = "機械割#101"; }
  const gainText = "獲得玉###" + [...tenseiHistory].reverse().map(x=>x.gain).join("#");
- const hitText = tenseiHistory.map(x=>{ if (machine === '鉄拳') { if (x.bType === '青7') return `${x.game}#1`; if (x.bType === '赤7') return `${x.game}#1#2`; if (x.bType === '直撃') return `${x.game}#2`; } if (machine === 'マギアレコード') { if (x.bType === 'みたまボーナス') return `${x.game}#1`; if (x.bType === 'ビッグボーナス') return `${x.game}#2`; if (x.bType === 'ビッグ→ラッシュ') return `${x.game}#2#3`; if (x.bType === 'ラッシュ') return `${x.game}#3`; } if (machine === 'ミリオンゴッド') { if (Number(x.chain) <= 1) return `${x.game}#1#2`; return `${x.game}#1#2###${x.chain}`; } if (Number(x.chain) === 1) return `${x.game}#1#2`; return `${x.game}#1#2###${x.chain}`; }).join("\n");
+ const hitText = tenseiHistory.map(x=>{ if (machine === '鉄拳') { if (x.bType === '青7') return `${x.game}#1`; if (x.bType === '赤7') return `${x.game}#1#2`; if (x.bType === '直撃') return `${x.game}#2`; } if (machine === 'マギアレコード') { if (x.bType === 'みたまボーナス') return `${x.game}#1`; if (x.bType === 'ビッグボーナス') return `${x.game}#2を開く`; if (x.bType === 'ビッグ→ラッシュ') return `${x.game}#2#3`; if (x.bType === 'ラッシュ') return `${x.game}#3`; } if (machine === 'ミリオンゴッド') { if (Number(x.chain) <= 1) return `${x.game}#1#2`; return `${x.game}#1#2###${x.chain}`; } if (Number(x.chain) === 1) return `${x.game}#1#2`; return `${x.game}#1#2###${x.chain}`; }).join("\n");
  const totalSpinV = getVal("totalSpin"), sitDownTotalSpinV = getVal("sitDownTotalSpin");
  const remainBallV = getVal("remainBall"), saveBallV = getVal("saveBall");
  const cashBallV = getVal("cashBall"), totalInvestV = getVal("totalInvestment");
@@ -736,6 +723,12 @@ function calculate(){
  const d=new Date(), w=["日","月","火","水","木","金","土"];
  resultText=`${d.getMonth()+1}/${d.getDate()}(${w[d.getDay()]})${USER_NAME}\n種銭${seedV}\n日当${salaryV}\n投資${investV}\n換金${cashV}\n次回${nextV}`; op.textContent=resultText;
 }
+
+function showKouryakuPage(name){
+ hideAll(); const map={"北斗転生2":"hokutoTensei2Area","鉄拳6":"tekken6Area","北斗の拳":"hokutoArea","ミリオンゴッド":"godArea","マギアレコード":"magirecoArea"};
+ if(map[name]) document.getElementById(map[name]).classList.remove("hidden"); else document.getElementById("unset1Area").classList.remove("hidden");
+}
+
 async function copyTensei(e){ try{ await navigator.clipboard.writeText(document.getElementById("tenseiOutput").textContent); e.target.innerText="コピーしました！"; setTimeout(()=>e.target.innerText="データをコピーする",1000); }catch(err){alert("コピー失敗");} }
 async function copyText(e){ try{ await navigator.clipboard.writeText(resultText); e.target.innerText="コピーしました！"; setTimeout(()=>e.target.innerText="結果をコピーする",1000); }catch(err){alert("コピー失敗");} }
 </script>

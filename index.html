@@ -136,9 +136,9 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
  <button onclick="showMenu()" style="background-color: #555;">戻る</button>
 </div>
 
-<!-- 放置ゲーム メインポータルメニュー（★v1.3に変更） -->
+<!-- 放置ゲーム メインポータルメニュー -->
 <div id="idleMenuArea" class="hidden game-container">
- <h2>🎮 放置モンスタークリッカー <span class="version-tag">v1.3</span></h2>
+ <h2>🎮 放置モンスタークリッカー <span class="version-tag">v1.4</span></h2>
  <div class="box" style="padding:20px; margin-bottom:20px;">
   <div class="gold-counter" style="margin-bottom:20px;">💎 所持エメラルド: <span id="menuEmeraldDisplay">0</span> エメ</div>
   <button onclick="showIdlePlaySetup()" style="background-color:#4caf50; font-size:1.2rem; padding:15px; margin-bottom:15px;">⚔️ エリア討伐 [プレイ]</button>
@@ -276,7 +276,7 @@ const wordsA = ["ルビー","サファイア","エメラルド","プラチナリ
 const wordsS = ["ダイヤモンド","ドラゴンの逆鱗","賢者の石の破片","冥王の鎌クズ","世界樹の若葉","神代の宝剣","星霊のコア","太陽の涙","砂時計","オリハルコン"];
 const wordsSS = ["魔王の心臓","神の涙","オベリスクの核","創世記の破片","終焉の刻印","虚無の天球","不滅の王冠","覇王龍の魂","時空の羅針盤","アヴァロンの聖杯"];
 
-// ★バグ完全除去：100%クラッシュしていたエラー記述を完全リペア
+// ★バグを跡形もなく完全リペア消去！
 for(let i=1; i<=ZUKAN_MAX; i++) {
  let r = "E"; let name = "";
  if(i <= 80) { r = "E"; name = wordsE[(i-1)%wordsE.length] + `【E-${i}】`; }
@@ -298,7 +298,6 @@ const MONSTER_SPECS = [
  { name: "👑 不死鳥", icon: "🦅" }
 ];
 
-// ★初期お供の表記バグ・未設定バグを完全解消
 let gameData = {
  gold: 0, emerald: 0, stage: 1, clickLvl: 1, autoPowerLvl: 1, autoSpeedLvl: 1, totalClicks: 0,
  bag: {}, targetGold: 100, targetItems: [], costs: { click: 10, auto: 20, speed: 64 },
@@ -579,7 +578,7 @@ function updateGameUI(){
  let specIdx = (gameData.stage - 1) % MONSTER_SPECS.length;
  let spec = MONSTER_SPECS[specIdx];
  document.getElementById("monsterName").innerText = `⚔️ ${spec.name} の領域`;
- document.getElementById("monsterFeature").innerText = `エリア特性: ショップリセット領域`;
+ document.getElementById("monsterFeature").innerText = `エリア特性: ショップリreset領域`;
  
  const currentCompName = gameData.equippedCompanion ? gameData.equippedCompanion : "スライム(初期お供)";
  document.getElementById("equippedCompanionDisplay").innerText = `⚔️ 出撃お供: ${currentCompName}`;
@@ -623,13 +622,12 @@ function saveGameBackend(){ gameData.lastTime = Date.now(); localStorage.setItem
 function loadGameBackend() { 
  const saved = localStorage.getItem('idle_slime_v13'); 
  if(saved) { gameData = JSON.parse(saved); }
- // ★初回起動の初期バグ回避
  if (!gameData.equippedCompanion) gameData.equippedCompanion = "スライム(初期お供)";
  if (!gameData.companions || gameData.companions.length === 0) gameData.companions = ["スライム(初期お供)"];
  if (!gameData.targetItems || gameData.targetItems.length === 0) { generateStageGoal(); }
 }
 
-/* --- パチスロツール共通ロジック群 --- */
+/* --- パチスロツールシステム共通ロジック --- */
 function updateAnimalOptions(){
  const machine = document.getElementById('machine').value; const animalEl = document.getElementById('animal'); if(!machine || !animalEl) return;
  let options=[];
@@ -739,9 +737,6 @@ function calculate(){
  const d=new Date(), w=["日","月","火","水","木","金","土"];
  resultText=`${d.getMonth()+1}/${d.getDate()}(${w[d.getDay()]})${USER_NAME}\n種銭${seedV}\n日当${salaryV}\n投資${investV}\n換金${cashV}\n次回${nextV}`; op.textContent=resultText;
 }
-function showKouryakuPage(name){ hideAll(); const map={"北斗転生2":"hokutoTensei2Area","鉄拳6":"tekken6Area","北斗の拳":"hokutoArea","ミリオンゴッド":"godArea","マギアレコード":"magirecoArea"}; if(map[name]) document.getElementById(map[name]).classList.remove("hidden"); else document.getElementById("unset1Area").classList.remove("hidden"); }
-async function copyTensei(e){ try{ await navigator.clipboard.writeText(document.getElementById("tenseiOutput").textContent); e.target.innerText="コピーしました！"; setTimeout(()=>e.target.innerText="データをコピーする",1000); }catch(err){alert("コピー失敗");} }
-async function copyText(e){ try{ await navigator.clipboard.writeText(resultText); e.target.innerText="コピーしました！"; setTimeout(()=>e.target.innerText="結果をコピーする",1000); }catch(err){alert("コピー失敗");} }
 </script>
 </body>
 </html>

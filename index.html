@@ -310,8 +310,10 @@ let isGoalAlerted = false;
 
 let audioCtx = null;
 function initAudio() {
- if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
- if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+ try {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+ } catch(e) {}
 }
 function playTone(freq, type, duration, vol = 0.1) {
  try { initAudio(); if (!audioCtx) return;
@@ -448,7 +450,7 @@ function initCompanionTimers() {
   let t = setInterval(()=>{ gameData.gold += (15 + bonusPower * 15); trackItemCounter(15); checkStageGoal(); updateGameUI(); }, currentInterval); companionTimers.push(t);
  } else if(compName === "やmataのおろち") {
   let t = setInterval(()=>{ let hits = Math.floor(Math.random() * 5) + 1; gameData.gold += (hits + bonusPower * hits); trackItemCounter(hits); checkStageGoal(); updateGameUI(); }, currentInterval); companionTimers.push(t);
-} else if(compName === "サタンジェネラル") {
+ } else if(compName === "サタンジェネラル") {
   let t = setInterval(()=>{ gameData.gold += (2 + bonusPower * 2); trackItemCounter(2); checkStageGoal(); updateGameUI(); }, currentInterval); companionTimers.push(t);
  } else if(compName === "魔人") {
   let t = setInterval(()=>{ if(Math.random() < 0.25) { gameData.gold += (7 + bonusPower * 7); trackItemCounter(7); checkStageGoal(); updateGameUI(); } }, currentInterval); companionTimers.push(t);
@@ -489,15 +491,14 @@ function trackItemCounter(amt) {
 function rollChestRaritySpec() {
  playTone(987, 'sine', 0.15);
  let rRoll = Math.random() * 100; let title = ""; let bg = ""; let desc = "";
- if (rRoll < 1.5) { activeChestType = "RAINBOW"; title = "🌈 虹の宝箱 が出現！"; bg = "#311b92"; desc = "中身スペック: [SS〜Aランク] の中からランダムに 1〜3種類 飛び出す！"; } 
- else if (rRoll < 8.0) { activeChestType = "GOLD"; title = "🟨 金の宝箱 が出現！"; bg = "#ffab00"; desc = "中身スペック: [A〜Cランク] の中からランダムに 1〜4種類 飛び出す！"; } 
- else if (rRoll < 40.0) { activeChestType = "SILVER"; title = "⬜ 銀の宝箱 が出現！"; bg = "#cfd8dc"; desc = "中身スペック: [B〜Dランク] の中からランダムに 2〜5種類 飛び出す！"; } 
- else { activeChestType = "BRONZE"; title = "🟫 銅の宝箱 が出現！"; bg = "#5d4037"; desc = "中身スペック: [C〜Eランク] の中からランダムに 2〜6種類 飛び出す！"; }
+ if (rRoll < 1.5) { activeChestType = "RAINBOW"; title = "🌈 虹の宝箱 が出現！"; bg = "#311b92"; desc = "中身スペック: [SS〜Aランク] からランダムに 1〜3種類 獲得！"; } 
+ else if (rRoll < 8.0) { activeChestType = "GOLD"; title = "🟨 金の宝箱 が出現！"; bg = "#ffab00"; desc = "中身スペック: [A〜Cランク] からランダムに 1〜4種類 獲得！"; } 
+ else if (rRoll < 40.0) { activeChestType = "SILVER"; title = "⬜ 銀の宝箱 が出現！"; bg = "#cfd8dc"; desc = "中身スペック: [B〜Dランク] からランダムに 2〜5種類 獲得！"; } 
+ else { activeChestType = "BRONZE"; title = "🟫 銅の宝箱 が出現！"; bg = "#5d4037"; desc = "中身スペック: [C〜Eランク] からランダムに 2〜6種類 獲得！"; }
  document.getElementById("chestTitleText").innerText = title; document.getElementById("chestDescriptionText").innerText = desc;
  const container = document.getElementById("treasureChestContainer"); container.style.backgroundColor = bg; container.style.display = "block";
 }
 
-// ★文字化けを跡形もなく完全リペア修復
 function openChestMultipleRandom() {
  playTone(1174, 'sine', 0.2);
  let allowedRarities = []; let minTypes = 1; let maxTypes = 3;
@@ -582,15 +583,19 @@ function updateGameUI(){
  if(!document.getElementById("gameGold")) return;
  document.getElementById("gameGold").innerText = gameData.gold;
  document.getElementById("stageTitle").innerText = `STAGE ${gameData.stage}`;
+ 
  let specIdx = (gameData.stage - 1) % MONSTER_SPECS.length; let spec = MONSTER_SPECS[specIdx];
  document.getElementById("monsterName").innerText = `⚔️ ${spec.name} の領域`;
+ 
  const currentCompName = gameData.equippedCompanion ? gameData.equippedCompanion : "スライム(初期お供)";
  document.getElementById("equippedCompanionDisplay").innerText = `⚔️ 出撃お供: ${currentCompName}`;
  document.getElementById("slimeBtn").innerText = spec.icon;
+ 
  let dropConfig = getDynamicDropConfig();
  document.getElementById("totalClicksCount").innerText = gameData.totalClicks;
  document.getElementById("targetClickThreshold").innerText = dropConfig.threshold;
  document.getElementById("dropChancePercentDisplay").innerText = dropConfig.chance.toFixed(1);
+ 
  document.getElementById("clickCost").innerText = gameData.costs.click;
  document.getElementById("clickPower").innerText = gameData.clickLvl;
  document.getElementById("autoCost").innerText = gameData.costs.auto;
@@ -629,12 +634,9 @@ function updateGameUI(){
  document.getElementById("bagDisplay").innerHTML = bagHTML === "" ? "アイテムはありません" : bagHTML;
 }
 
-function copyText(e){ e.preventDefault(); initAudio(); const txt=document.getElementById("output").textContent; navigator.clipboard.writeText(txt).then(()=>{alert("精算データをコピーしました！");}); }
-function copyTensei(e){ e.preventDefault(); initAudio(); const txt=document.getElementById("tenseiOutput").textContent; navigator.clipboard.writeText(txt).then(()=>{alert("台データをコピーしました！");}); }
-
-function saveGameBackend(){ gameData.lastTime = Date.now(); localStorage.setItem('idle_slime_v19_save', JSON.stringify(gameData)); }
+function saveGameBackend(){ gameData.lastTime = Date.now(); localStorage.setItem('idle_slime_v21_save', JSON.stringify(gameData)); }
 function loadGameBackend() { 
- const saved = localStorage.getItem('idle_slime_v19_save'); if(saved) { gameData = JSON.parse(saved); }
+ const saved = localStorage.getItem('idle_slime_v21_save'); if(saved) { gameData = JSON.parse(saved); }
  if (!gameData.equippedCompanion) gameData.equippedCompanion = "スライム(初期お供)";
  if (!gameData.companions || gameData.companions.length === 0) gameData.companions = ["スライム(初期お供)"];
  if (!gameData.targetItems || gameData.targetItems.length === 0) { generateStageGoal(); }
@@ -665,6 +667,19 @@ function updateTenseiPreview(){
  const gainText = "獲得玉###" + [...tenseiHistory].reverse().map(x=>x.gain).join("#"); const hitText = tenseiHistory.map(x=>{ if (machine === '鉄拳') { if (x.bType === '青7') return `${x.game}#1`; if (x.bType === '赤7') return `${x.game}#1#2`; if (x.bType === '直撃') return `${x.game}#2`; } if (machine === 'マギアレコード') { if (x.bType === 'みたまボーナス') return `${x.game}#1`; if (x.bType === 'ビッグボーナス') return `${x.game}#2`; if (x.bType === 'ビッグ→ラッシュ') return `${x.game}#2#3`; if (x.bType === 'ラッシュ') return `${x.game}#3`; } if (machine === 'ミリオンゴッド') { if (Number(x.chain) <= 1) return `${x.game}#1#2`; return `${x.game}#1#2###${x.chain}`; } if (Number(x.chain) === 1) return `${x.game}#1#2`; return `${x.game}#1#2###${x.chain}`; }).join("\n"); const totalSpinV = getVal("totalSpin"), sitDownTotalSpinV = getVal("sitDownTotalSpin"); const remainBallV = getVal("remainBall"), saveBallV = getVal("saveBall"); const cashBallV = getVal("cashBall"), totalInvestV = getVal("totalInvestment"); const yameGameV = getVal("yameGame"), startSpinV = getVal("startSpin"); const recentSamaiV = getVal("recentSamai"), rateV = getVal("rate"); const storeV = document.getElementById("store").value, daiBanV = getVal("daiBan"); let condSection = expect !== "" ? expect : machineRate; let cashOutput = cashBallV === "" ? ((totalInvestV !== "") ? `(${totalInvestV})` : "") : cashBallV + ((totalInvestV !== "") ? `(${totalInvestV})` : ""); const hitSection = hitText !== "" ? `${hitText}\n` : ""; let spinFooterSection = machine === '北斗' ? `\n直近差枚${recentSamaiV}\n天井消化${startSpinV}\n着席時回転数${startSpinV}\n着席時総回転数${sitDownTotalSpinV}` : `\n着席時回転数${startSpinV}\n天井消化${startSpinV}\n着席時総回転数${sitDownTotalSpinV}`;
  tOutput.textContent=`機種番号${baseNo}\n計算条件1\n${customTitle}\n${headerBBAT}\n${condSection !== "" ? "\n" + condSection : ""}\n仕事量同集計\n総回転数${totalSpinV}\n\n${gainText}\n\n残玉${remainBallV}\n貯玉${saveBallV}\n現金${cashOutput}\n\n${yameGameV}#0\n${hitSection}${spinFooterSection}\n換金率1000#${rateV}\n貸玉1000#${rateV}\n\n店名${storeV}\n台番${daiBanV}\n名前${USER_NAME}`;
 }
+
+function calculate(){
+ const sd = document.getElementById("seed"), sl = document.getElementById("salary");
+ const iv = document.getElementById("investment"), ch = document.getElementById("cash"), op = document.getElementById("output");
+ if(!sd || !sl || !iv || !ch || !op) return;
+ const seedV=sd.value===""?"":Number(sd.value).toLocaleString(); const salaryV=sl.value===""?"":Number(sl.value).toLocaleString();
+ const investV=iv.value===""?"":Number(iv.value).toLocaleString(); const cashV=ch.value===""?"":Number(ch.value).toLocaleString();
+ let nextV = ""; if(sd.value!=="" || ch.value!=="" || sl.value!=="" || iv.value!=="") { nextV = (Number(sd.value||0)+Number(ch.value||0)-Number(sl.value||0)-Number(iv.value||0)).toLocaleString(); }
+ const d=new Date(), w=["日","月","火","水","木","金","土"];
+ resultText=`${d.getMonth()+1}/${d.getDate()}(${w[d.getDay()]})${USER_NAME}\n種銭${seedV}\n日当${salaryV}\n投資${investV}\n換金${cashV}\n次回${nextV}`; op.textContent=resultText;
+}
+
+function copyText(e){ e.preventDefault(); const txt=document.getElementById("output").textContent; if(!txt){alert("先に計算を実行してください");return;} navigator.clipboard.writeText(txt).then(()=>{alert("精算データをコピーしました！");}); }
 </script>
 </body>
 </html>

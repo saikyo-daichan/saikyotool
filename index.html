@@ -135,7 +135,7 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 </div>
 
 <div id="idleMenuArea" class="hidden game-container">
- <h2>🎮 放置モンスタークリッカー <span class="version-tag">v2.0</span></h2>
+ <h2>🎮 放置モンスタークリッカー <span class="version-tag">v2.1</span></h2>
  <div class="box" style="padding:20px; margin-bottom:20px;">
   <div class="gold-counter" style="margin-bottom:20px;">💎 所持エメラルド: <span id="menuEmeraldDisplay">0</span> エメ</div>
   <button onclick="showIdlePlaySetup()" style="background-color:#4caf50; font-size:1.2rem; padding:15px; margin-bottom:15px;">⚔️ エリア討伐 [プレイ]</button>
@@ -203,7 +203,7 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
   <div id="bagDisplay" class="bag-grid">アイテムはありません</div>
  </div>
 
- <button onclick="nextStageCheck()" id="nextStageBtn" style="background-color:#4caf50; display:none; margin-top:5px; animation: pulse 1s infinite;">🎉 条件クリア！次のエリアへ進む (+100エメ)</button>
+ <button onclick="nextStageCheck()" id="nextStageBtn" style="background-color:#4caf50; display:none; margin-top:5px;">🎉 条件クリア！次のエリアへ進む (+100エメ)</button>
  <button onclick="showIdleMenu()" style="background-color: #555; margin-top:10px;">エリアを離れてポータルへ戻る</button>
 </div>
 
@@ -303,9 +303,7 @@ let gameData = {
  zukan: {}, lastTime: Date.now(), mimicClicks: 0
 };
 
-// 宝箱内部の一時記録用
 let activeChestType = ""; 
-
 let companionTimers = [];
 let skCount = 0;
 let isGoalAlerted = false;
@@ -531,203 +529,4 @@ function rollChestRaritySpec() {
  } else if (rRoll < 8.0) { 
   activeChestType = "GOLD"; title = "🟨 金の宝箱 が出現！"; bg = "#ffab00"; desc = "中身スペック: [A〜Cランク] の中からランダムに 1〜4種類 飛び出す！";
  } else if (rRoll < 40.0) { 
-  activeChestType = "SILVER"; title = "⬜ 銀の宝箱 が出現！"; bg = "#cfd8dc"; desc = "中身スペック: [B〜Dランク] の中からランダムに 2〜5種類 飛び出す！";
- } else { 
-  activeChestType = "BRONZE"; title = "🟫 銅の宝箱 が出現！"; bg = "#5d4037"; desc = "中身スペック: [C〜Eランク] の中からランダムに 2〜6種類 飛び出す！";
- }
- 
- document.getElementById("chestTitleText").innerText = title;
- document.getElementById("chestDescriptionText").innerText = desc;
- const container = document.getElementById("treasureChestContainer");
- container.style.backgroundColor = bg;
- container.style.display = "block";
-}
-
-// ★ご要望：選ぶんじゃなくて各ランク範囲からランダムに複数種類(数個ずつ)ジャラッと一括獲得！
-function openChestMultipleRandom() {
- playTone(1174, 'sine', 0.2);
- let allowedRarities = [];
- let minTypes = 1; let maxTypes = 3;
- 
- if (activeChestType === "BRONZE") { allowedRarities = ["C", "D", "E"]; minTypes = 2; maxTypes = 6; } 
- else if (activeChestType === "SILVER") { allowedRarities = ["B", "C", "D"]; minTypes = 2; maxTypes = 5; } 
- else if (activeChestType === "GOLD") { allowedRarities = ["A", "B", "C"]; minTypes = 1; maxTypes = 4; } 
- else if (activeChestType === "RAINBOW") { allowedRarities = ["SS", "S", "A"]; minTypes = 1; maxTypes = 3; }
-
- // 要求条件に沿う対象アイテムのIDをプール化
- let subPool = RARITY_LIST.filter(x => allowedRarities.includes(x.rarity));
- let rolledTypesCount = Math.floor(Math.random() * (maxTypes - minTypes + 1)) + minTypes;
- 
- let reportList = [];
- let chosenIds = [];
-
- while(chosenIds.length < Math.min(rolledTypesCount, subPool.length)) {
-  let meta = subPool[Math.floor(Math.random() * subPool.length)];
-  if(!chosenIds.includes(meta.id)) {
-   chosenIds.push(meta.id);
-   let finalItem = ITEM_POOL[meta.id];
-   // 各種類ごとに1〜3個の個数をジャラッとランダム獲得
-   let qty = Math.floor(Math.random() * 3) + 1;
-   gameData.bag[finalItem.name] = (gameData.bag[finalItem.name] || 0) + qty;
-   gameData.zukan[finalItem.name] = true;
-   reportList.push(`・[${finalItem.rarity}] ${finalItem.name} x ${qty}個`);
-  }
- }
-
- alert(`🎁 宝箱を開放しました！\n中から以下の素材がジャラジャラッと飛び出した！\n\n${reportList.join("\n")}`);
- document.getElementById("treasureChestContainer").style.display = "none";
- checkStageGoal(); updateGameUI(); saveGameBackend();
-}
-
-function selectRarityItemDroppedOnly() {
- let rRoll = Math.random() * 100; let chosenRarity = "E";
- if(rRoll < 0.1) chosenRarity = "SS"; else if(rRoll < 0.6) chosenRarity = "S"; else if(rRoll < 2.6) chosenRarity = "A"; else if(rRoll < 8.6) chosenRarity = "B"; else if(rRoll < 23.6) chosenRarity = "C"; else if(rRoll < 53.6) chosenRarity = "D"; else chosenRarity = "E";
- let matchedPool = RARITY_LIST.filter(x => x.rarity === chosenRarity); if(matchedPool.length === 0) matchedPool = RARITY_LIST.filter(x => x.rarity === "E");
- let rolledItemObj = matchedPool[Math.floor(Math.random() * matchedPool.length)]; return ITEM_POOL[rolledItemObj.id];
-}
-
-function executeRarityItemDrop() {
- let finalItem = selectRarityItemDroppedOnly();
- gameData.bag[finalItem.name] = (gameData.bag[finalItem.name] || 0) + 1; gameData.zukan[finalItem.name] = true;
-}
-
-function sellItemActual(itemName) {
- if(!gameData.bag[itemName] || gameData.bag[itemName] <= 0) return;
- let itemId = Object.keys(ITEM_POOL).find(k => ITEM_POOL[k].name === itemName); if(!itemId) return;
- let rarity = ITEM_POOL[itemId].rarity; let price = SALE_PRICES[rarity] || 10;
- gameData.bag[itemName]--; gameData.gold += price; if(gameData.bag[itemName] <= 0) delete gameData.bag[itemName];
- soundTap(); checkStageGoal(); updateGameUI(); saveGameBackend();
-}
-
-function generateStageGoal() {
- let stg = gameData.stage; isGoalAlerted = false; gameData.targetGold = stg * 250; gameData.targetItems = [];
- let reqTypesCount = Math.min(6, 1 + Math.floor(stg / 4)); let reqQty = Math.min(5, 1 + Math.floor(stg / 7)); let selectedIDs = [];
- while(selectedIDs.length < reqTypesCount) {
-  let allowedPool = [];
-  if (stg <= 3) { allowedPool = RARITY_LIST.filter(x => x.rarity === "E"); } 
-  else if (stg <= 9) { allowedPool = RARITY_LIST.filter(x => ["E", "D"].includes(x.rarity)); } 
-  else if (stg <= 15) { allowedPool = RARITY_LIST.filter(x => ["E", "D", "C"].includes(x.rarity)); } 
-  else if (stg <= 19) { allowedPool = RARITY_LIST.filter(x => ["E", "D", "C", "B", "A"].includes(x.rarity)); } 
-  else { allowedPool = RARITY_LIST; }
-  let chosenMeta = allowedPool[Math.floor(Math.random() * allowedPool.length)];
-  if(!selectedIDs.includes(chosenMeta.id)) { selectedIDs.push(chosenMeta.id); gameData.targetItems.push({ id: chosenMeta.id, qty: reqQty }); }
- }
-}
-
-function checkStageGoal(){
- const nextBtn = document.getElementById("nextStageBtn"); let goldOk = (gameData.gold >= gameData.targetGold); let itemsOk = true;
- if (!gameData.targetItems || gameData.targetItems.length === 0) return;
- gameData.targetItems.forEach(item => { let name = ITEM_POOL[item.id].name; if((gameData.bag[name] || 0) < item.qty) itemsOk = false; });
- if(goldOk && itemsOk) { nextBtn.style.display = "block"; if (!isGoalAlerted) { soundGoal(); isGoalAlerted = true; } } else { nextBtn.style.display = "none"; }
-}
-
-function nextStageCheck(){
- gameData.stage++; gameData.emerald += 100;
- gameData.gold = 0; gameData.bag = {}; gameData.totalClicks = 0; gameData.mimicClicks = 0;
- gameData.clickLvl = 1; gameData.autoPowerLvl = 1; gameData.autoSpeedLvl = 1;
- gameData.costs = { click: 10, auto: 20, speed: 64 };
- document.getElementById("nextStageBtn").style.display = "none"; document.getElementById("treasureChestContainer").style.display = "none";
- generateStageGoal(); updateGameUI(); stopCompanionTimers(); initCompanionTimers(); saveGameBackend();
-}
-
-function buyClickPower(){ if(gameData.gold >= gameData.costs.click){ gameData.gold -= gameData.costs.click; gameData.clickLvl++; gameData.costs.click = Math.floor(gameData.costs.click * 1.6); updateGameUI(); saveGameBackend(); } }
-function buyAutoPower(){ if(gameData.gold >= gameData.costs.auto){ gameData.gold -= gameData.costs.auto; gameData.autoPowerLvl++; gameData.costs.auto = Math.floor(gameData.costs.auto * 1.7); updateGameUI(); saveGameBackend(); stopCompanionTimers(); initCompanionTimers(); } }
-function buyAutoSpeed(){
- const compName = gameData.equippedCompanion ? gameData.equippedCompanion : "スライム(初期お供)"; let baseInterval = getCompanionBaseInterval(compName); let currentSec = Math.max(50, baseInterval - (gameData.autoSpeedLvl - 1) * 50); if(currentSec <= 50) return;
- if(gameData.gold >= gameData.costs.speed){ gameData.gold -= gameData.costs.speed; gameData.autoSpeedLvl++; gameData.costs.speed = Math.floor(gameData.costs.speed * 1.8); updateGameUI(); saveGameBackend(); stopCompanionTimers(); initCompanionTimers(); }
-}
-
-function updateGameUI(){
- if(!document.getElementById("gameGold")) return;
- document.getElementById("gameGold").innerText = gameData.gold;
- document.getElementById("stageTitle").innerText = `STAGE ${gameData.stage}`;
- 
- let specIdx = (gameData.stage - 1) % MONSTER_SPECS.length; let spec = MONSTER_SPECS[specIdx];
- document.getElementById("monsterName").innerText = `⚔️ ${spec.name} の領域`;
- 
- const currentCompName = gameData.equippedCompanion ? gameData.equippedCompanion : "スライム(初期お供)";
- document.getElementById("equippedCompanionDisplay").innerText = `⚔️ 出撃お供: ${currentCompName}`;
- document.getElementById("slimeBtn").innerText = spec.icon;
- 
- let dropConfig = getDynamicDropConfig();
- document.getElementById("totalClicksCount").innerText = gameData.totalClicks;
- document.getElementById("targetClickThreshold").innerText = dropConfig.threshold;
- document.getElementById("dropChancePercentDisplay").innerText = dropConfig.chance.toFixed(1);
- 
- document.getElementById("clickCost").innerText = gameData.costs.click;
- document.getElementById("clickPower").innerText = gameData.clickLvl;
- document.getElementById("autoCost").innerText = gameData.costs.auto;
- document.getElementById("autoPower").innerText = gameData.autoPowerLvl;
- document.getElementById("monsterAtkName").innerText = currentCompName;
-
- let baseInterval = getCompanionBaseInterval(currentCompName);
- let currentIntervalMs = Math.max(50, baseInterval - (gameData.autoSpeedLvl - 1) * 50);
- let secDisplay = (currentIntervalMs / 1000).toFixed(2);
- document.getElementById("autoIntervalDisplay").innerText = secDisplay;
-
- const speedBtn = document.getElementById("speedBuyBtn");
- if(currentIntervalMs <= 50) { speedBtn.innerText = "MAX"; speedBtn.style.backgroundColor = "#555"; document.getElementById("speedCost").innerText = "--"; } 
- else { speedBtn.innerText = "強化"; speedBtn.style.backgroundColor = "#4caf50"; document.getElementById("speedCost").innerText = gameData.costs.speed; }
-
- let currentCompObj = GACHA_POOL.find(p => p.name === currentCompName);
- document.getElementById("companionFeatureInfo").innerText = currentCompObj ? `お供特性: ${currentCompObj.desc}` : "特性: 1.0秒に1回叩く標準型";
-
- if(gameData.equippedCompanion === "ミミック") { document.getElementById("mimicBonusDisplay").style.display = "block"; document.getElementById("mimicClicksCount").innerText = gameData.mimicClicks; }
- else { document.getElementById("mimicBonusDisplay").style.display = "none"; }
-
- let gColor = gameData.gold >= gameData.targetGold ? "#00e676" : "#ff5252";
- let reqText = `🎯 <b>金額目標</b>: <span style="color:${gColor};">💰 ${gameData.gold} / ${gameData.targetGold} G</span><br><br>🎯 <b>指定アイテム収集</b>:<br>`;
- if (gameData.targetItems && gameData.targetItems.length > 0) {
-  gameData.targetItems.forEach(item => {
-   if(ITEM_POOL[item.id]) {
-    let itemMeta = ITEM_POOL[item.id]; let has = gameData.bag[itemMeta.name] || 0;
-    let iColor = has >= item.qty ? "#00e676" : "#ff5252";
-    reqText += `<span style="color:${iColor}; font-size:0.85rem;">・[${itemMeta.rarity}] ${itemMeta.name} (${has} / ${item.qty}個)</span><br>`;
-   }
-  });
- }
- document.getElementById("stageRequirement").innerHTML = reqText;
-
- let bagHTML = ""; for(let key in gameData.bag) { if(gameData.bag[key] > 0) { bagHTML += `<div class="bag-row"><div>📦 ${key} x ${gameData.bag[key]}</div><button onclick="sellItemActual('${key}')">売却する</button></div>`; } }
- document.getElementById("bagDisplay").innerHTML = bagHTML === "" ? "アイテムはありません" : bagHTML;
-}
-
-function copyText(e){ e.preventDefault(); initAudio(); const txt=document.getElementById("output").textContent; navigator.clipboard.writeText(txt).then(()=>{alert("精算データをコピーしました！");}); }
-function copyTensei(e){ e.preventDefault(); initAudio(); const txt=document.getElementById("tenseiOutput").textContent; navigator.clipboard.writeText(txt).then(()=>{alert("台データをコピーしました！");}); }
-
-function saveGameBackend(){ gameData.lastTime = Date.now(); localStorage.setItem('idle_slime_v19_save', JSON.stringify(gameData)); }
-function loadGameBackend() { 
- const saved = localStorage.getItem('idle_slime_v19_save'); if(saved) { gameData = JSON.parse(saved); }
- if (!gameData.equippedCompanion) gameData.equippedCompanion = "スライム(初期お供)";
- if (!gameData.companions || gameData.companions.length === 0) gameData.companions = ["スライム(初期お供)"];
- if (!gameData.targetItems || gameData.targetItems.length === 0) { generateStageGoal(); }
-}
-
-/* --- パチスロツール共通ロジック --- */
-function updateAnimalOptions(){
- const machine = document.getElementById('machine').value; const animalEl = document.getElementById('animal'); if(!machine || !animalEl) return;
- let options=[]; if(machine==='北斗転生') options=['イノシシ','ウリ坊']; else if(machine==='鉄拳') options=['リセ','AT間天井狙い']; else if(machine==='北斗') options=['リセ','差枚']; else if(machine==='ミリオンゴッド') options=['AT間連荘狙い','前回VVV揃い後','前回Z-ZONE後','前回赤7揃い後','前回天井到達後','前回GOD揃い後','前回5連以上後','前々回赤7揃い後','前々回Z-ZONE後','前々回VVV揃い後']; else if(machine==='マギアレコード') options=['AT間天井狙い'];
- animalEl.innerHTML=''; options.forEach(o=>{ const opt=document.createElement('option'); opt.value=o; opt.textContent=o; animalEl.appendChild(opt); }); if(options.length <= 1) animalEl.classList.add("hidden"); else animalEl.classList.remove("hidden");
-}
-function updateInputFields() {
- const machine = document.getElementById('machine').value, animal = document.getElementById('animal').value; const expectInput = document.getElementById('valueExpect'), recentSamaiInput = document.getElementById('recentSamai'), row = document.getElementById('hitInputRow'); if(!expectInput || !recentSamaiInput || !row) return;
- if ((machine === '鉄拳' && animal === 'AT間天井狙い') || (machine === 'ミリオンゴッド' && animal === 'AT間連荘狙い') || machine === 'マギアレコード') expectInput.classList.remove("hidden"); else expectInput.classList.add("hidden"); if (machine === '北斗') recentSamaiInput.classList.remove("hidden"); else recentSamaiInput.classList.add("hidden");
- if (machine === '鉄拳') row.innerHTML = `<input id="hitGame" type="number" placeholder="G数"><select id="bonusType"><option value="青7">青7</option><option value="赤7">赤7</option><option value="直撃">直撃</option></select><input id="gainBall" type="number" placeholder="枚数">`; else if (machine === 'マギアレコード') row.innerHTML = `<input id="hitGame" type="number" placeholder="G数"><select id="bonusType"><option value="みたまボーナス">みたま</option><option value="ビッグボーナス">ビッグ</option><option value="ビッグ→ラッシュ">B+R</option><option value="ラッシュ">RUSH</option></select><input id="gainBall" type="number" placeholder="枚数">`; else row.innerHTML = `<input id="hitGame" type="number" placeholder="G数"><input id="chainCount" type="number" placeholder="連荘"><input id="gainBall" type="number" placeholder="枚数">`;
-}
-function saveAllInputs() { const fields = ["machine", "store", "machineNo", "daiBan", "animal", "valueExpect", "startSpin", "totalSpin", "sitDownTotalSpin", "recentSamai", "remainBall", "saveBall", "cashBall", "totalInvestment", "yameGame", "rate"]; const backupData = {}; fields.forEach(id => { const el = document.getElementById(id); if (el) backupData[id] = el.value; }); backupData["tenseiHistory"] = tenseiHistory; localStorage.setItem('tensei_auto_backup', JSON.stringify(backupData)); }
-function loadSavedInputs() {
- const savedDataRaw = localStorage.getItem('tensei_auto_backup'); if (!savedDataRaw) { updateTenseiPreview(); return; }
- const backupData = JSON.parse(savedDataRaw); if (backupData["machine"]) document.getElementById("machine").value = backupData["machine"]; updateAnimalOptions(); if (backupData["animal"]) document.getElementById("animal").value = backupData["animal"]; updateInputFields();
- const fields = ["store", "machineNo", "daiBan", "valueExpect", "startSpin", "totalSpin", "sitDownTotalSpin", "recentSamai", "remainBall", "saveBall", "cashBall", "totalInvestment", "yameGame", "rate"]; fields.forEach(id => { if (backupData[id] !== undefined && document.getElementById(id)) document.getElementById(id).value = backupData[id]; }); if (backupData["tenseiHistory"]) tenseiHistory = backupData["tenseiHistory"]; updateTenseiPreview();
-}
-function resetAllTenseiFields() { if (!confirm("現在入力されている内容と大当り履歴をすべて消去しますか？")) return; const fields = ["machineNo", "daiBan", "valueExpect", "startSpin", "totalSpin", "sitDownTotalSpin", "recentSamai", "remainBall", "saveBall", "cashBall", "totalInvestment", "yameGame"]; fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; }); tenseiHistory = []; localStorage.removeItem('tensei_auto_backup'); updateTenseiPreview(); }
-function addEntry(){ const hG = document.getElementById("hitGame"), gB = document.getElementById("gainBall"), cC = document.getElementById("chainCount"), bT = document.getElementById("bonusType"); if(!hG || !gB) return; const game = Number(hG.value), gain = Number(gB.value); let chain = "", bType = ""; if (cC) { chain = Number(cC.value); if(!game || !chain) return; } else if (bT) { bType = bT.value; if(!game) return; } tenseiHistory.unshift({game, chain, gain, bType}); hG.value=""; if(cC) cC.value=""; gB.value=""; updateTenseiPreview(); saveAllInputs(); }
-function deleteEntry(i){ tenseiHistory.splice(i,1); updateTenseiPreview(); saveAllInputs(); }
-function updateTenseiPreview(){
- const hList = document.getElementById("historyList"), tOutput = document.getElementById("tenseiOutput"); if(!hList || !tOutput) return; const machine = document.getElementById('machine').value, animal = document.getElementById('animal').value; hList.innerHTML=tenseiHistory.map((x,i)=>{ let midText = x.chain !== "" ? `${x.chain}連` : `${x.bType}`; return `<div>${x.game}G → ${midText} → ${x.gain}枚 <button class="smallbtn" onclick="deleteEntry(${i})">削除</button></div>`; }).join("\n"); const getVal = (id) => { const el = document.getElementById(id); return (!el || el.value === "") ? "" : el.value; }; const machineNoVal = getVal("machineNo"), expVal = getVal("valueExpect"); let baseNo = 3818; if (machine === '北斗') baseNo = 3840; let machineRate = "", expect = "", headerBBAT = "(1:RB 2:AT)", customTitle = `(${machine} ${animal}${machineNoVal})`; if (machine === '北斗転生') machineRate = animal === 'ウリ坊' ? "機械割#99" : "機械割#106"; if (machine === '鉄拳') { headerBBAT = "(1:BB 2:AT)"; if (animal === 'リセ') expect = "等価期待値1479"; if (animal === 'AT間天井狙い' && expVal !== "") expect = `等価期待値${expVal}`; } if (machine === 'マギアレコード') { customTitle = `(まどマギ AT間天井狙い${machineNoVal})`; headerBBAT = "(1:RB 2:BB 3:AT)"; if (expVal !== "") expect = `等価期待値${expVal}`; } if (machine === 'ミリオンゴッド') { headerBBAT = "(1:初当 2:連荘)"; if (animal === 'AT間連荘狙い') { if (expVal !== "") expect = `等価期待値${expVal}`; } else if (animal === '前回VVV揃い後') machineRate = "機械割#130"; else if (['前回Z-ZONE後', '前回赤7揃い後', '前回天井到達後'].includes(animal)) machineRate = "機械割#102"; else if (['開GOD揃い後', '前回5連以上後', '前々回赤7揃い後', '前々回Z-ZONE後', '前々回VVV揃い後'].includes(animal)) machineRate = "機械割#101"; }
- const gainText = "獲得玉###" + [...tenseiHistory].reverse().map(x=>x.gain).join("#"); const hitText = tenseiHistory.map(x=>{ if (machine === '鉄拳') { if (x.bType === '青7') return `${x.game}#1`; if (x.bType === '赤7') return `${x.game}#1#2`; if (x.bType === '直撃') return `${x.game}#2`; } if (machine === 'マギアレコード') { if (x.bType === 'みたまボーナス') return `${x.game}#1`; if (x.bType === 'ビッグボーナス') return `${x.game}#2`; if (x.bType === 'ビッグ→ラッシュ') return `${x.game}#2#3`; if (x.bType === 'ラッシュ') return `${x.game}#3`; } if (machine === 'ミリオンゴッド') { if (Number(x.chain) <= 1) return `${x.game}#1#2`; return `${x.game}#1#2###${x.chain}`; } if (Number(x.chain) === 1) return `${x.game}#1#2`; return `${x.game}#1#2###${x.chain}`; }).join("\n"); const totalSpinV = getVal("totalSpin"), sitDownTotalSpinV = getVal("sitDownTotalSpin"); const remainBallV = getVal("remainBall"), saveBallV = getVal("saveBall"); const cashBallV = getVal("cashBall"), totalInvestV = getVal("totalInvestment"); const yameGameV = getVal("yameGame"), startSpinV = getVal("startSpin"); const recentSamaiV = getVal("recentSamai"), rateV = getVal("rate"); const storeV = document.getElementById("store").value, daiBanV = getVal("daiBan"); let condSection = expect !== "" ? expect : machineRate; let cashOutput = cashBallV === "" ? ((totalInvestV !== "") ? `(${totalInvestV})` : "") : cashBallV + ((totalInvestV !== "") ? `(${totalInvestV})` : ""); const hitSection = hitText !== "" ? `${hitText}\n` : ""; let spinFooterSection = machine === '北斗' ? `\n直近差枚${recentSamaiV}\n天井消化${startSpinV}\n着席時回転数${startSpinV}\n着席時総回転数${sitDownTotalSpinV}` : `\n着席時回転数${startSpinV}\n天井消化${startSpinV}\n着席時総回転数${sitDownTotalSpinV}`;
- tOutput.textContent=`機種番号${baseNo}\n計算条件1\n${customTitle}\n${headerBBAT}\n${condSection !== "" ? "\n" + condSection : ""}\n仕事量同集計\n総回転数${totalSpinV}\n\n${gainText}\n\n残玉${remainBallV}\n貯玉${saveBallV}金${cashOutput}\n\n${yameGameV}#0\n${hitSection}${spinFooterSection}\n換金率1000#${rateV}\n貸玉1000#${rateV}\n\n店名${storeV}\n台番${daiBanV}\n名前${USER_NAME}`;
-}
-</script>
-</body>
-</html>
+  activeChestType = "SILVER"; title = "⬜ 銀の宝箱 が出現！"; bg = "#cfd8dc"; desc

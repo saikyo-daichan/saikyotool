@@ -141,7 +141,7 @@ pre{white-space:pre-wrap;background:#111;padding:10px;border-radius:4px;color:#0
 
 <!-- 放置ゲーム メインポータルメニュー -->
 <div id="idleMenuArea" class="hidden game-container">
- <h2>🎮 放置モンスタークリッカー <span class="version-tag">v2.2</span></h2>
+ <h2>🎮 放置モンスタークリッカー <span class="version-tag">v2.3</span></h2>
  <div class="box" style="padding:20px; margin-bottom:20px;">
   <div class="gold-counter" style="margin-bottom:20px;">💎 所持エメラルド: <span id="menuEmeraldDisplay">0</span> エメ</div>
   <button onclick="showIdlePlaySetup()" style="background-color:#4caf50; font-size:1.2rem; padding:15px; margin-bottom:15px;">⚔️ エリア討伐 [プレイ]</button>
@@ -272,7 +272,6 @@ const GACHA_POOL = [
  { name: "神様", star: 4, desc: "7.0秒毎に1回 (5%の確率で追加100回叩く)" }
 ];
 
-// ★300種類データ構築ロジックの完全な構文修正
 const ITEM_POOL = {};
 const ZUKAN_MAX = 300;
 const RARITY_LIST = [];
@@ -354,7 +353,7 @@ function hideAll(){
 function login(){ const p=document.getElementById("password").value; if(p===PASSWORD){ localStorage.setItem("loggedIn","true"); showMenu(); }else{ alert("暗証番号が違います"); } }
 function logout(){ localStorage.removeItem("loggedIn"); showLogin(); }
 function showMenu(){ hideAll(); document.getElementById("menuArea").classList.remove("hidden"); stopCompanionTimers(); gameData.lastTime = Date.now(); saveGameBackend(); }
-function showTensei(){hideAll(); document.getElementById("tenseiArea").classList.remove("hidden"); updateTenseiPreview(); gameData.lastTime = Date.now(); saveGameBackend(); }
+function showTensei(){hideAll(); document.getElementById("tenseiArea").classList.remove("hidden"); updateTenseiPreview(); saveGameBackend(); }
 function showSeisan(){hideAll(); document.getElementById("seisanArea").classList.remove("hidden"); gameData.lastTime = Date.now(); saveGameBackend(); }
 function showKouryaku(){hideAll(); document.getElementById("kouryakuArea").classList.remove("hidden");}
 function showKouryakuPage(p){ hideAll(); if(p==='北斗転生2') document.getElementById("hokutoTensei2Area").classList.remove("hidden"); else if(p==='鉄拳6') document.getElementById("tekken6Area").classList.remove("hidden"); else if(p==='北斗の拳') document.getElementById("hokutoArea").classList.remove("hidden"); else if(p==='ミリオンゴッド') document.getElementById("godArea").classList.remove("hidden"); else if(p==='マギアレコード') document.getElementById("magirecoArea").classList.remove("hidden"); else document.getElementById("unset1Area").classList.remove("hidden"); }
@@ -642,9 +641,9 @@ function updateGameUI(){
  document.getElementById("bagDisplay").innerHTML = bagHTML === "" ? "アイテムはありません" : bagHTML;
 }
 
-function saveGameBackend(){ gameData.lastTime = Date.now(); localStorage.setItem('idle_slime_v22_save', JSON.stringify(gameData)); }
+function saveGameBackend(){ gameData.lastTime = Date.now(); localStorage.setItem('idle_slime_v19_save', JSON.stringify(gameData)); }
 function loadGameBackend() { 
- const saved = localStorage.getItem('idle_slime_v22_save'); if(saved) { gameData = JSON.parse(saved); }
+ const saved = localStorage.getItem('idle_slime_v19_save'); if(saved) { gameData = JSON.parse(saved); }
  if (!gameData.equippedCompanion) gameData.equippedCompanion = "スライム(初期お供)";
  if (!gameData.companions || gameData.companions.length === 0) gameData.companions = ["スライム(初期お供)"];
  if (!gameData.targetItems || gameData.targetItems.length === 0) { generateStageGoal(); }
@@ -670,10 +669,13 @@ function loadSavedInputs() {
 function resetAllTenseiFields() { if (!confirm("現在入力されている内容と大当り履歴をすべて消去しますか？")) return; const fields = ["machineNo", "daiBan", "valueExpect", "startSpin", "totalSpin", "sitDownTotalSpin", "recentSamai", "remainBall", "saveBall", "cashBall", "totalInvestment", "yameGame"]; fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; }); tenseiHistory = []; localStorage.removeItem('tensei_auto_backup'); updateTenseiPreview(); }
 function addEntry(){ const hG = document.getElementById("hitGame"), gB = document.getElementById("gainBall"), cC = document.getElementById("chainCount"), bT = document.getElementById("bonusType"); if(!hG || !gB) return; const game = Number(hG.value), gain = Number(gB.value); let chain = "", bType = ""; if (cC) { chain = Number(cC.value); if(!game || !chain) return; } else if (bT) { bType = bT.value; if(!game) return; } tenseiHistory.unshift({game, chain, gain, bType}); hG.value=""; if(cC) cC.value=""; gB.value=""; updateTenseiPreview(); saveAllInputs(); }
 function deleteEntry(i){ tenseiHistory.splice(i,1); updateTenseiPreview(); saveAllInputs(); }
+
 function updateTenseiPreview(){
  const hList = document.getElementById("historyList"), tOutput = document.getElementById("tenseiOutput"); if(!hList || !tOutput) return; const machine = document.getElementById('machine').value, animal = document.getElementById('animal').value; hList.innerHTML=tenseiHistory.map((x,i)=>{ let midText = x.chain !== "" ? `${x.chain}連` : `${x.bType}`; return `<div>${x.game}G → ${midText} → ${x.gain}枚 <button class="smallbtn" onclick="deleteEntry(${i})">削除</button></div>`; }).join("\n"); const getVal = (id) => { const el = document.getElementById(id); return (!el || el.value === "") ? "" : el.value; }; const machineNoVal = getVal("machineNo"), expVal = getVal("valueExpect"); let baseNo = 3818; if (machine === '北斗') baseNo = 3840; let machineRate = "", expect = "", headerBBAT = "(1:RB 2:AT)", customTitle = `(${machine} ${animal}${machineNoVal})`; if (machine === '北斗転生') machineRate = animal === 'ウリ坊' ? "機械割#99" : "機械割#106"; if (machine === '鉄拳') { headerBBAT = "(1:BB 2:AT)"; if (animal === 'リセ') expect = "等価期待値1479"; if (animal === 'AT間天井狙い' && expVal !== "") expect = `等価期待値${expVal}`; } if (machine === 'マギアレコード') { customTitle = `(まどマギ AT間天井狙い${machineNoVal})`; headerBBAT = "(1:RB 2:BB 3:AT)"; if (expVal !== "") expect = `等価期待値${expVal}`; } if (machine === 'ミリオンゴッド') { headerBBAT = "(1:初当 2:連荘)"; if (animal === 'AT間連荘狙い') { if (expVal !== "") expect = `等価期待値${expVal}`; } else if (animal === '前回VVV揃い後') machineRate = "機械割#130"; else if (['前回Z-ZONE後', '前回赤7揃い後', '前回天井到達後'].includes(animal)) machineRate = "機械割#102"; else if (['開GOD揃い後', '前回5連以上後', '前々回赤7揃い後', '前々回Z-ZONE後', '前々回VVV揃い後'].includes(animal)) machineRate = "機械割#101"; }
  const gainText = "獲得玉###" + [...tenseiHistory].reverse().map(x=>x.gain).join("#"); const hitText = tenseiHistory.map(x=>{ if (machine === '鉄拳') { if (x.bType === '青7') return `${x.game}#1`; if (x.bType === '赤7') return `${x.game}#1#2`; if (x.bType === '直撃') return `${x.game}#2`; } if (machine === 'マギアレコード') { if (x.bType === 'みたまボーナス') return `${x.game}#1`; if (x.bType === 'ビッグボーナス') return `${x.game}#2`; if (x.bType === 'ビッグ→ラッシュ') return `${x.game}#2#3`; if (x.bType === 'ラッシュ') return `${x.game}#3`; } if (machine === 'ミリオンゴッド') { if (Number(x.chain) <= 1) return `${x.game}#1#2`; return `${x.game}#1#2###${x.chain}`; } if (Number(x.chain) === 1) return `${x.game}#1#2`; return `${x.game}#1#2###${x.chain}`; }).join("\n"); const totalSpinV = getVal("totalSpin"), sitDownTotalSpinV = getVal("sitDownTotalSpin"); const remainBallV = getVal("remainBall"), saveBallV = getVal("saveBall"); const cashBallV = getVal("cashBall"), totalInvestV = getVal("totalInvestment"); const yameGameV = getVal("yameGame"), startSpinV = getVal("startSpin"); const recentSamaiV = getVal("recentSamai"), rateV = getVal("rate"); const storeV = document.getElementById("store").value, daiBanV = getVal("daiBan"); let condSection = expect !== "" ? expect : machineRate; let cashOutput = cashBallV === "" ? ((totalInvestV !== "") ? `(${totalInvestV})` : "") : cashBallV + ((totalInvestV !== "") ? `(${totalInvestV})` : ""); const hitSection = hitText !== "" ? `${hitText}\n` : ""; let spinFooterSection = machine === '北斗' ? `\n直近差枚${recentSamaiV}\n天井消化${startSpinV}\n着席時回転数${startSpinV}\n着席時総回転数${sitDownTotalSpinV}` : `\n着席時回転数${startSpinV}\n天井消化${startSpinV}\n着席時総回転数${sitDownTotalSpinV}`;
- tOutput.textContent=`機種番号${baseNo}\n計算条件1\n${customTitle}\n${headerBBAT}\n${condSection !== "" ? "\n" + condSection : ""}\n仕事量同集計\n総回転数${totalSpinV}\n\n${gainText}\n\n残玉${remainBallV}\n貯玉${saveBallV}金${cashOutput}\n\n${yameGameV}#0\n${hitSection}${spinFooterSection}\n換金率1000#${rateV}\n貸玉1000#${rateV}\n\n店名${storeV}\n台番${daiBanV}\n名前${USER_NAME}`;
+ 
+ // ★バグ完全修正：「貯玉」と「現金(投資)」の間に \n を追加し完璧に分離！
+ tOutput.textContent=`機種番号${baseNo}\n計算条件1\n${customTitle}\n${headerBBAT}\n${condSection !== "" ? "\n" + condSection : ""}\n仕事量同集計\n総回転数${totalSpinV}\n\n${gainText}\n\n残玉${remainBallV}\n貯玉${saveBallV}\n現金${cashOutput}\n\n${yameGameV}#0\n${hitSection}${spinFooterSection}\n換金率1000#${rateV}\n貸玉1000#${rateV}\n\n店名${storeV}\n台番${daiBanV}\n名前${USER_NAME}`;
 }
 
 function calculate(){
@@ -687,7 +689,6 @@ function calculate(){
  resultText=`${d.getMonth()+1}/${d.getDate()}(${w[d.getDay()]})${USER_NAME}\n種銭${seedV}\n日当${salaryV}\n投資${investV}\n換金${cashV}\n次回${nextV}`; op.textContent=resultText;
 }
 
-// ★完全復活：消失していた台データ一括コピー用関数を完全定義！
 async function copyTensei(e){ 
  e.preventDefault(); 
  try {
